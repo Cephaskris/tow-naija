@@ -167,3 +167,143 @@ export const verifyOTP = mutation({
     return { success: true, userId: newUserId, role: 'passenger' as const };
   },
 });
+
+// Register a new user (passenger or driver) with phone number and password
+export const registerWithPassword = mutation({
+  args: {
+    firstName: v.string(),
+    lastName: v.string(),
+    phone: v.string(),
+    password: v.string(),
+    email: v.optional(v.string()),
+    role: v.union(v.literal("passenger"), v.literal("driver")),
+  },
+  handler: async (ctx, args) => {
+    const cleanDigits = args.phone.replace(/\D/g, "");
+    if (!cleanDigits || cleanDigits.length < 9) {
+      throw new Error("Please provide a valid phone number.");
+    }
+
+    const formattedPhone = cleanDigits.startsWith("234")
+      ? `+${cleanDigits}`
+      : `+234${cleanDigits.replace(/^0+/, "")}`;
+
+    // Check if user already exists
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_phone", (q) => q.eq("phone", formattedPhone))
+      .first();
+
+    if (existingUser) {
+      throw new Error("An account with this phone number already exists. Please sign in.");
+    }
+
+    const newUserId = await ctx.db.insert("users", {
+      firstName: args.firstName.trim(),
+      lastName: args.lastName.trim(),
+      email: args.email?.trim() || undefined,
+      phone: formattedPhone,
+      password: args.password,
+      role: args.role,
+      connectionCredits: 5000,
+      createdAt: Date.now(),
+    });
+
+    if (args.role === "driver") {
+      await ctx.db.insert("drivers", {
+        userId: newUserId,
+        isAvailable: false,
+        verificationStatus: "unverified",
+        connectionCredits: 5000,
+        createdAt: Date.now(),
+      });
+    }
+
+    return {
+      success: true,
+      userId: newUserId,
+      role: args.role,
+    };
+  },
+});
+
+// Login existing user with phone number and password
+export const loginWithPassword = mutation({
+  args: {
+    phone: v.string(),
+    password: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const cleanDigits = args.phone.replace(/\D/g, "");
+    if (!cleanDigits || cleanDigits.length < 9) {
+      throw new Error("Please enter a valid phone number.");
+    }
+
+    const formattedWithPlus = cleanDigits.startsWith("234")
+      ? `+${cleanDigits}`
+      : `+234${cleanDigits.replace(/^0+/, "")}`;
+    const formattedWithoutPlus = formattedWithPlus.replace("+", "");
+    const formattedLocal = "0" + cleanDigits.replace(/^234/, "").replace(/^0+/, "");
+
+    // Look up user by phone variations
+    let user = await ctx.db
+      .query("users")
+      .withIndex("by_phone", (q) => q.eq("phone", formattedWithPlus))
+      .first();
+
+    if (!user) {
+      user = await ctx.db
+        .query("users")
+        .withIndex("by_phone", (q) => q.eq("phone", formattedWithoutPlus))
+        .first();
+    }
+
+    if (!user) {
+      user = await ctx.db
+        .query("users")
+        .withIndex("by_phone", (q) => q.eq("phone", formattedLocal))
+        .first();
+    }
+
+    if (!user) {
+      // Fallback: check all users by suffix match
+      const allUsers = await ctx.db.query("users").collect();
+      user =
+        allUsers.find((u) => {
+          const uClean = u.phone.replace(/\D/g, "");
+          return (
+            uClean === cleanDigits ||
+            uClean.endsWith(cleanDigits.slice(-10)) ||
+            cleanDigits.endsWith(uClean.slice(-10))
+          );
+        }) || null;
+    }
+
+    if (!user) {
+      throw new Error("No account found with this phone number. Please sign up first.");
+    }
+
+    if (user.isBanned) {
+      throw new Error(`Account suspended: ${user.bannedReason || "Please contact support."}`);
+    }
+
+    // Verify password
+    if (user.password) {
+      if (user.password !== args.password) {
+        throw new Error("Incorrect password. Please try again.");
+      }
+    } else {
+      // For existing legacy accounts without password, set it on first password login
+      await ctx.db.patch(user._id, { password: args.password });
+    }
+
+    return {
+      success: true,
+      userId: user._id,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    };
+  },
+});
+

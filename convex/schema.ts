@@ -7,6 +7,7 @@ export default defineSchema({
     lastName: v.string(),
     email: v.optional(v.string()), // Email is optional if they just use phone
     phone: v.string(),
+    password: v.optional(v.string()), // Password for authentication
     role: v.union(v.literal("passenger"), v.literal("driver"), v.literal("admin")),
     isBanned: v.optional(v.boolean()),
     bannedReason: v.optional(v.string()),

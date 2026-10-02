@@ -1,6 +1,6 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ChevronDown, ChevronRight, Mail, Phone, User, Truck, ShieldCheck, AlertCircle } from 'lucide-react-native';
+import { ChevronDown, ChevronRight, Mail, Phone, User, Truck, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react-native';
 import React, { useState, useEffect, useRef } from 'react';
 import {
     Image,
@@ -15,12 +15,14 @@ import {
     Alert,
     Platform,
 } from 'react-native';
-import { useAction } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
+import { useAuth } from '../context/AuthContext';
 
 export default function RegisterScreen() {
     const router = useRouter();
     const params = useLocalSearchParams();
+    const { setUserId } = useAuth();
 
     // Mode can be 'passenger' or 'driver'
     const [selectedRole, setSelectedRole] = useState<'passenger' | 'driver'>('passenger');
@@ -29,12 +31,16 @@ export default function RegisterScreen() {
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const firstNameRef = useRef<TextInput>(null);
 
-    const sendOTP = useAction(api.auth.sendOTP);
+    const registerWithPassword = useMutation(api.auth.registerWithPassword);
 
     useEffect(() => {
         if (params.role === 'driver') {
@@ -57,7 +63,15 @@ export default function RegisterScreen() {
             return;
         }
         if (!cleanPhone || cleanPhone.length < 9) {
-            setErrorMessage("Please enter a valid 10-digit phone number.");
+            setErrorMessage("Please enter a valid phone number (at least 10 digits).");
+            return;
+        }
+        if (!password || password.length < 6) {
+            setErrorMessage("Password must be at least 6 characters long.");
+            return;
+        }
+        if (password !== confirmPassword) {
+            setErrorMessage("Passwords do not match. Please check and try again.");
             return;
         }
 
@@ -67,16 +81,28 @@ export default function RegisterScreen() {
                 ? `+${cleanPhone}` 
                 : `+234${cleanPhone.replace(/^0+/, '')}`;
             
-            await sendOTP({ phone: formattedPhone });
-            
-            router.push(
-                `/otp?phone=${encodeURIComponent(formattedPhone)}&firstName=${encodeURIComponent(firstName.trim())}&lastName=${encodeURIComponent(lastName.trim())}&email=${encodeURIComponent(email.trim())}&isRegistering=true&role=${role}`
-            );
+            const result = await registerWithPassword({
+                firstName: firstName.trim(),
+                lastName: lastName.trim(),
+                email: email.trim() || undefined,
+                phone: formattedPhone,
+                password: password,
+                role: role,
+            });
+
+            if (result && result.success && result.userId) {
+                await setUserId(result.userId);
+                if (role === 'driver') {
+                    router.replace('/(driver)/verify');
+                } else {
+                    router.replace('/(passenger)');
+                }
+            }
         } catch (error: any) {
-            const msg = error.message || "Failed to send verification code. Please try again.";
+            const msg = error.message || "Registration failed. Please try again.";
             setErrorMessage(msg);
             if (Platform.OS !== 'web') {
-                Alert.alert("Error", msg);
+                Alert.alert("Registration Error", msg);
             }
         } finally {
             setIsLoading(false);
@@ -88,12 +114,10 @@ export default function RegisterScreen() {
         setSelectedRole('driver');
 
         const cleanPhone = phone.replace(/\D/g, '');
-        // If inputs are already provided, submit immediately for driver registration
-        if (firstName.trim() && lastName.trim() && cleanPhone.length >= 9) {
+        if (firstName.trim() && lastName.trim() && cleanPhone.length >= 9 && password && password === confirmPassword) {
             handleRegisterSubmit('driver');
         } else {
-            // Otherwise, switch mode and highlight inputs with guidance
-            setErrorMessage("Selected Driver Mode: Please fill in your name and phone number above, then tap 'Register as Driver'.");
+            setErrorMessage("Selected Driver Mode: Please fill in all fields and tap 'Register as Driver'.");
             firstNameRef.current?.focus();
         }
     };
@@ -104,12 +128,12 @@ export default function RegisterScreen() {
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 <View style={styles.header}>
                     <Text style={styles.title}>
-                        {selectedRole === 'driver' ? 'Driver Registration' : "Let's Get Started"}
+                        {selectedRole === 'driver' ? 'Driver Registration' : "Create Account"}
                     </Text>
                     <Text style={styles.subtitle}>
                         {selectedRole === 'driver'
-                            ? 'Register your tow truck to start receiving high-paying towing jobs.'
-                            : 'Please provide your details to request roadside rescue.'}
+                            ? 'Register your tow truck to start receiving high-paying towing requests.'
+                            : 'Create your account with your phone number and password.'}
                     </Text>
                 </View>
 
@@ -153,6 +177,7 @@ export default function RegisterScreen() {
                 )}
 
                 <View style={styles.form}>
+                    {/* First Name */}
                     <View style={styles.inputContainer}>
                         <User size={20} color="#64748B" style={styles.inputIcon} />
                         <TextInput
@@ -170,6 +195,7 @@ export default function RegisterScreen() {
                         />
                     </View>
 
+                    {/* Last Name */}
                     <View style={styles.inputContainer}>
                         <User size={20} color="#64748B" style={styles.inputIcon} />
                         <TextInput
@@ -186,6 +212,7 @@ export default function RegisterScreen() {
                         />
                     </View>
 
+                    {/* Email (Optional) */}
                     <View style={styles.inputContainer}>
                         <Mail size={20} color="#64748B" style={styles.inputIcon} />
                         <TextInput
@@ -201,6 +228,7 @@ export default function RegisterScreen() {
                         />
                     </View>
 
+                    {/* Phone Number */}
                     <View style={styles.phoneRow}>
                         <View style={styles.countryPicker}>
                             <Image
@@ -228,7 +256,67 @@ export default function RegisterScreen() {
                         </View>
                     </View>
 
-                    {/* Primary Continue Button */}
+                    {/* Password */}
+                    <View style={styles.inputContainer}>
+                        <Lock size={20} color="#64748B" style={styles.inputIcon} />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Create Password (min. 6 chars) *"
+                            placeholderTextColor="#64748B"
+                            value={password}
+                            onChangeText={(text) => {
+                                setPassword(text);
+                                if (errorMessage) setErrorMessage(null);
+                            }}
+                            secureTextEntry={!showPassword}
+                            autoCapitalize="none"
+                            spellCheck={false}
+                            autoCorrect={false}
+                            underlineColorAndroid="transparent"
+                        />
+                        <TouchableOpacity
+                            onPress={() => setShowPassword(!showPassword)}
+                            style={styles.eyeButton}
+                        >
+                            {showPassword ? (
+                                <EyeOff size={20} color="#64748B" />
+                            ) : (
+                                <Eye size={20} color="#64748B" />
+                            )}
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Confirm Password */}
+                    <View style={styles.inputContainer}>
+                        <Lock size={20} color="#64748B" style={styles.inputIcon} />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Confirm Password *"
+                            placeholderTextColor="#64748B"
+                            value={confirmPassword}
+                            onChangeText={(text) => {
+                                setConfirmPassword(text);
+                                if (errorMessage) setErrorMessage(null);
+                            }}
+                            secureTextEntry={!showConfirmPassword}
+                            autoCapitalize="none"
+                            spellCheck={false}
+                            autoCorrect={false}
+                            underlineColorAndroid="transparent"
+                        />
+                        <TouchableOpacity
+                            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                            style={styles.eyeButton}
+                        >
+                            {showConfirmPassword ? (
+                                <EyeOff size={20} color="#64748B" />
+                            ) : (
+                                <Eye size={20} color="#64748B" />
+                            )}
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Primary Register Button */}
                     <TouchableOpacity
                         style={styles.continueButton}
                         onPress={() => handleRegisterSubmit()}
@@ -239,14 +327,14 @@ export default function RegisterScreen() {
                         ) : (
                             <>
                                 <Text style={styles.continueButtonText}>
-                                    {selectedRole === 'driver' ? 'Register as Driver' : 'Continue'}
+                                    {selectedRole === 'driver' ? 'Register as Driver' : 'Create Account'}
                                 </Text>
                                 <ChevronRight size={24} color="#0F172A" />
                             </>
                         )}
                     </TouchableOpacity>
 
-                    {/* Google Sign In Helper */}
+                    {/* Demo Autofill Helper */}
                     <TouchableOpacity 
                         style={styles.googleButton}
                         onPress={() => {
@@ -255,19 +343,19 @@ export default function RegisterScreen() {
                                 setLastName('Operator');
                                 setEmail('tow.driver@townaija.ng');
                                 setPhone('8134567890');
+                                setPassword('password123');
+                                setConfirmPassword('password123');
                             } else {
-                                setFirstName('Google');
-                                setLastName('User');
-                                setEmail('google.user@example.com');
+                                setFirstName('Chioma');
+                                setLastName('Adeyemi');
+                                setEmail('chioma@example.com');
                                 setPhone('8123456789');
+                                setPassword('password123');
+                                setConfirmPassword('password123');
                             }
                             setErrorMessage(null);
                         }}
                     >
-                        <Image
-                            source={{ uri: 'https://img.icons8.com/color/48/000000/google-logo.png' }}
-                            style={styles.googleIcon}
-                        />
                         <Text style={styles.googleButtonText}>Fill Demo Credentials</Text>
                     </TouchableOpacity>
 
@@ -306,7 +394,7 @@ const styles = StyleSheet.create({
         paddingBottom: 40,
     },
     header: {
-        marginBottom: 24,
+        marginBottom: 20,
     },
     title: {
         fontSize: 30,
@@ -325,7 +413,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#0F172A',
         borderRadius: 14,
         padding: 4,
-        marginBottom: 20,
+        marginBottom: 16,
         borderWidth: 1,
         borderColor: '#1E293B',
     },
@@ -367,7 +455,7 @@ const styles = StyleSheet.create({
         lineHeight: 18,
     },
     form: {
-        gap: 16,
+        gap: 14,
     },
     inputContainer: {
         flexDirection: 'row',
@@ -375,10 +463,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 12,
         paddingHorizontal: 16,
-        height: 60,
+        height: 56,
     },
     inputIcon: {
         marginRight: 12,
+    },
+    eyeButton: {
+        padding: 8,
     },
     input: {
         flex: 1,
@@ -397,7 +488,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 12,
         paddingHorizontal: 12,
-        height: 60,
+        height: 56,
         gap: 6,
     },
     flag: {
@@ -417,11 +508,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 12,
         paddingHorizontal: 16,
-        height: 60,
+        height: 56,
     },
     continueButton: {
         backgroundColor: '#FACC15',
-        height: 60,
+        height: 56,
         borderRadius: 12,
         flexDirection: 'row',
         alignItems: 'center',
@@ -438,7 +529,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_700Bold',
     },
     googleButton: {
-        height: 56,
+        height: 48,
         borderRadius: 12,
         borderWidth: 1.5,
         borderColor: '#1E293B',
@@ -446,19 +537,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 10,
-    },
-    googleIcon: {
-        width: 20,
-        height: 20,
     },
     googleButtonText: {
-        fontSize: 14,
+        fontSize: 13,
         color: '#CBD5E1',
         fontFamily: 'Poppins_600SemiBold',
     },
     driverButton: {
-        height: 56,
+        height: 52,
         borderRadius: 12,
         borderWidth: 1.5,
         borderColor: '#FACC15',
@@ -475,7 +561,7 @@ const styles = StyleSheet.create({
     loginRow: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 18,
+        marginTop: 14,
     },
     alreadyText: {
         color: '#94A3B8',
@@ -488,3 +574,4 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_700Bold',
     },
 });
+
