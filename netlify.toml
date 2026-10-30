@@ -1,0 +1,6 @@
+# Hosts the landing page at / and the admin dashboard at /admin/ (free; works with private GitHub repos).
+# In Netlify set environment variables: SUPABASE_URL, SUPABASE_ANON_KEY, and optionally
+# APK_URL, COMMISSION, SUPPORT_PHONE, SUPPORT_EMAIL.
+[build]
+  command = "python3 build_site.py"
+  publish = "dist"

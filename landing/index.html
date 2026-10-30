@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Townaija — Tow trucks on demand, across Nigeria</title>
+<meta name="description" content="Stuck on the road in Abuja? Name your price and verified tow operators near you send offers in minutes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --yellow: #EBF826;
+  --yellow-hover: #D8E51B;
+  --yellow-soft: #F9FCE5;
+  --black: #0B0C0E;
+  --card-dark: #121316;
+  --bg: #F5F6F8;
+  --card: #FFFFFF;
+  --card-subtle: #F0F2F5;
+  --muted: #7E828D;
+  --faint: #BCC0CA;
+  --line: #E8EAEF;
+  --font: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --r-pill: 9999px;
+  --r-card: 28px;
+  --r-sm: 16px;
+  --shadow-sm: 0 4px 14px rgba(0,0,0,0.03);
+  --shadow-md: 0 12px 36px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.02);
+  --shadow-lg: 0 24px 60px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.03);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--black); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+html { scroll-behavior: smooth; }
+a { color: inherit; text-decoration: none; }
+input:focus { outline: none; border-color: var(--black) !important; background: #fff !important; }
+
+/* Custom details */
+summary::-webkit-details-marker { display: none; }
+summary { list-style: none; cursor: pointer; }
+summary::after { content: "+"; float: right; font-weight: 500; font-size: 24px; line-height: 1; transition: transform 0.2s; }
+details[open] summary::after { content: "−"; }
+
+/* Phone Mockup Animations & Details */
+.phone-frame {
+  width: 295px;
+  height: 620px;
+  background: #FFFFFF;
+  border-radius: 46px;
+  border: 7px solid #0B0C0E;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.16), 0 10px 24px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+}
+.phone-frame:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.22);
+}
+.phone-notch {
+  width: 80px;
+  height: 20px;
+  background: #000;
+  border-radius: 12px;
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+}
+
+@media (max-width: 980px) {
+  .mockups-grid { overflow-x: auto; padding-bottom: 24px; justify-content: flex-start !important; }
+}
+@media (max-width: 640px) {
+  h1 { font-size: 42px !important; line-height: 1.05 !important; }
+  h2 { font-size: 32px !important; }
+  .hero-section { padding-top: 40px !important; }
+}
+</style>
+</head>
+<body>
+
+<div style="min-width: 0">
+
+  <!-- Header -->
+  <header style="background: rgba(245, 246, 248, 0.9); backdrop-filter: blur(16px); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--line)">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px">
+      <a href="#top" style="display: flex; align-items: center; gap: 12px">
+        <span style="width: 38px; height: 38px; border-radius: var(--r-pill); background: var(--yellow); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(235, 248, 38, 0.4)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16h3l2-5h7l3 5h5M6 16a2 2 0 1 0 4 0M15 16a2 2 0 1 0 4 0M14 11V6l5 4"></path></svg>
+        </span>
+        <span style="font-size: 22px; font-weight: 800; letter-spacing: -0.03em">Townaija</span>
+      </a>
+
+      <!-- Center capsule navigation -->
+      <nav style="display: flex; align-items: center; background: #FFFFFF; border: 1px solid var(--line); border-radius: var(--r-pill); padding: 4px 6px; box-shadow: var(--shadow-sm); gap: 2px" class="desktop-nav">
+        <a href="#how" style="padding: 8px 16px; border-radius: var(--r-pill); font-size: 14px; font-weight: 600; color: var(--muted); transition: all 0.2s">How it works</a>
+        <a href="#app-preview" style="padding: 8px 16px; border-radius: var(--r-pill); font-size: 14px; font-weight: 600; color: var(--muted); transition: all 0.2s">The App</a>
+        <a href="#operators" style="padding: 8px 16px; border-radius: var(--r-pill); font-size: 14px; font-weight: 600; color: var(--muted); transition: all 0.2s">Tow operators</a>
+        <a href="#safety" style="padding: 8px 16px; border-radius: var(--r-pill); font-size: 14px; font-weight: 600; color: var(--muted); transition: all 0.2s">Safety</a>
+        <a href="#faq" style="padding: 8px 16px; border-radius: var(--r-pill); font-size: 14px; font-weight: 600; color: var(--muted); transition: all 0.2s">Help</a>
+      </nav>
+
+      <div style="display: flex; align-items: center; gap: 10px">
+        <a href="/admin/" style="background: #FFFFFF; border: 1px solid var(--line); color: var(--black); font-size: 14px; font-weight: 600; padding: 10px 18px; border-radius: var(--r-pill); transition: background 0.2s">Admin portal</a>
+        <a href="#download" style="background: var(--yellow); color: #000000; font-size: 14px; font-weight: 700; padding: 10px 20px; border-radius: var(--r-pill); box-shadow: 0 4px 16px rgba(235, 248, 38, 0.4); transition: transform 0.2s, background 0.2s">Get the app</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="top" class="hero-section" style="max-width: 1240px; margin: 0 auto; padding: 68px 24px 60px; display: flex; flex-direction: column; gap: 48px">
+    <div style="max-width: 900px; margin: 0 auto; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px">
+      <!-- Live Badge -->
+      <div style="display: inline-flex; align-items: center; gap: 8px; background: #FFFFFF; border: 1px solid var(--line); padding: 7px 16px; border-radius: var(--r-pill); box-shadow: var(--shadow-sm)">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); box-shadow: 0 0 0 4px rgba(235, 248, 38, 0.4)"></span>
+        <span style="font-size: 13px; font-weight: 700; color: var(--black); letter-spacing: -0.01em">Now live in Abuja · Lagos rolling out next</span>
+      </div>
+
+      <h1 style="margin: 0; font-size: 58px; line-height: 1.08; font-weight: 800; letter-spacing: -0.04em">
+        Stuck on the road?<br><span style="background: linear-gradient(180deg, #0B0C0E 0%, #2B2C30 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Name your price. Get towed.</span>
+      </h1>
+
+      <p style="margin: 0; font-size: 20px; line-height: 1.55; color: var(--muted); max-width: 32em">
+        Verified tow operators nearby accept or counter in real time. Choose your truck, verify with your start code, and pay directly.
+      </p>
+
+      <!-- Quick Request Capsule Form -->
+      <div style="width: 100%; max-width: 580px; margin-top: 12px; background: #FFFFFF; border: 1.5px solid var(--line); border-radius: var(--r-pill); padding: 6px 8px 6px 20px; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-md)">
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--yellow); border: 2.5px solid #000; flex-shrink: 0"></div>
+        <input type="text" placeholder="Where is your stranded vehicle?" style="flex: 1; border: none; background: transparent; font-size: 15px; font-weight: 500; font-family: inherit; color: var(--black)">
+        <a href="#download" style="background: var(--black); color: #FFFFFF; font-size: 14px; font-weight: 700; padding: 14px 24px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; transition: opacity 0.2s">
+          Request tow
+          <span style="width: 20px; height: 20px; border-radius: 50%; background: var(--yellow); color: #000; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800">↗</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- 3-PHONE EXHIBITION MOCKUPS (EXACT REFERENCE DESIGN SYSTEM) -->
+    <div id="app-preview" style="padding: 30px 10px; background: radial-gradient(ellipse at center, rgba(255,255,255,0.9) 0%, rgba(240,242,246,0.6) 65%, transparent 100%); border-radius: 40px">
+      <div style="display: flex; justify-content: center; gap: 32px; flex-wrap: wrap" class="mockups-grid">
+
+        <!-- PHONE 1: Customer Home (Abuja Map & Quick Tow Request) -->
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          
+          <!-- Screen 1 Inner Content -->
+          <div style="flex: 1; display: flex; flex-direction: column; background: #EEF0F4; position: relative; overflow: hidden">
+            
+            <!-- Map Top Bar Overlay -->
+            <div style="position: absolute; top: 38px; left: 16px; right: 16px; z-index: 10; display: flex; align-items: center; justify-content: space-between">
+              <div style="width: 36px; height: 36px; border-radius: 50%; background: #FFFFFF; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.4"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              </div>
+
+              <!-- Segmented Capsule (Abuja Live) -->
+              <div style="background: #FFFFFF; border-radius: var(--r-pill); padding: 3px 10px 3px 6px; display: flex; align-items: center; gap: 6px; box-shadow: var(--shadow-sm); border: 1px solid var(--line)">
+                <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--yellow); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #000">
+                  ABJ
+                </div>
+                <span style="font-size: 12px; font-weight: 700; color: var(--black)">Abuja · Live</span>
+              </div>
+
+              <div style="width: 36px; height: 36px; border-radius: 50%; background: #FFFFFF; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+              </div>
+            </div>
+
+            <!-- Map Vector Canvas (Abuja central corridors) -->
+            <div style="flex: 1; position: relative">
+              <svg width="100%" height="350" viewBox="0 0 295 350" style="position: absolute; top: 0; left: 0">
+                <!-- Roads -->
+                <path d="M-20 110 L315 130" stroke="#FFFFFF" stroke-width="20"/>
+                <path d="M80 -20 L60 350" stroke="#FFFFFF" stroke-width="18"/>
+                <path d="M-20 230 L315 220" stroke="#FFFFFF" stroke-width="16"/>
+                <path d="M210 10 L230 320" stroke="#FFFFFF" stroke-width="14"/>
+                <path d="M130 120 L270 20" stroke="#FFFFFF" stroke-width="12"/>
+
+                <!-- Street labels -->
+                <text x="88" y="104" fill="#9DA0A8" font-size="8" font-weight="700" letter-spacing="0.5">AHMADU BELLO WAY</text>
+                <text x="12" y="224" fill="#9DA0A8" font-size="8" font-weight="700" letter-spacing="0.5">SHEHU SHAGARI WAY</text>
+
+                <!-- Customer Stranded Pin with Pulse Ring (Wuse II) -->
+                <circle cx="95" cy="170" r="14" fill="rgba(235, 248, 38, 0.35)"/>
+                <circle cx="95" cy="170" r="7" fill="#0B0C0E" stroke="#FFFFFF" stroke-width="2.5"/>
+                <g transform="translate(48, 142)">
+                  <rect width="94" height="20" rx="10" fill="#0B0C0E"/>
+                  <text x="47" y="13" fill="#FFFFFF" font-size="9" font-weight="700" text-anchor="middle">Your vehicle · Wuse II</text>
+                </g>
+
+                <!-- Nearby Verified Tow Truck 1 (Flatbed) -->
+                <g transform="translate(190, 80)">
+                  <circle cx="18" cy="18" r="16" fill="#EBF826" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.2))"/>
+                  <!-- Tow truck SVG -->
+                  <path d="M11 20 L13 14 L23 14 L25 20 Z" fill="#0B0C0E"/>
+                  <circle cx="13" cy="21" r="2.2" fill="#0B0C0E"/>
+                  <circle cx="23" cy="21" r="2.2" fill="#0B0C0E"/>
+                </g>
+                <g transform="translate(162, 116)">
+                  <rect width="92" height="18" rx="9" fill="#FFFFFF" stroke="#EAECEF" stroke-width="1"/>
+                  <text x="46" y="12" fill="#0B0C0E" font-size="8.5" font-weight="800" text-anchor="middle">Flatbed · 4 min away</text>
+                </g>
+
+                <!-- Nearby Verified Tow Truck 2 (Wheel-lift) -->
+                <g transform="translate(30, 240)">
+                  <circle cx="15" cy="15" r="14" fill="#FFFFFF" stroke="#EAECEF" stroke-width="1.5" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.12))"/>
+                  <circle cx="15" cy="15" r="9" fill="#0B0C0E"/>
+                  <path d="M12 16 L18 16 M13 13 L17 13" stroke="#FFFFFF" stroke-width="1.5"/>
+                </g>
+                <g transform="translate(10, 272)">
+                  <rect width="84" height="18" rx="9" fill="#FFFFFF" stroke="#EAECEF" stroke-width="1"/>
+                  <text x="42" y="12" fill="#7E828D" font-size="8.5" font-weight="700" text-anchor="middle">Wheel-lift · 12 min</text>
+                </g>
+              </svg>
+            </div>
+
+            <!-- Slide-up Bottom Card (Customer Home Controls) -->
+            <div style="background: #FFFFFF; border-radius: 32px 32px 0 0; padding: 18px 16px 14px; box-shadow: 0 -10px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 11px; z-index: 20">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start">
+                <div>
+                  <div style="font-size: 22px; font-weight: 800; letter-spacing: -0.03em; color: var(--black)">Welcome!</div>
+                  <div style="font-size: 12px; font-weight: 500; color: var(--muted); margin-top: 1px">Tow trucks near you in Abuja</div>
+                </div>
+                <span style="background: rgba(235,248,38,0.25); color: #000; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: var(--r-pill)">8 trucks online</span>
+              </div>
+
+              <!-- Vehicle Location Input Capsule -->
+              <div style="background: #F5F6F8; border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px; display: flex; align-items: center; gap: 10px">
+                <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--yellow); border: 2px solid #000; flex-shrink: 0"></div>
+                <div style="flex: 1; overflow: hidden">
+                  <div style="font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px">Vehicle Location</div>
+                  <div style="font-size: 13px; font-weight: 700; color: var(--black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">TotalEnergies, Wuse II, Abuja</div>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2"><path d="M12 2a8 8 0 0 0-8 8c0 5 8 12 8 12s8-7 8-12a8 8 0 0 0-8-8z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              </div>
+
+              <!-- Canary Yellow Primary Button -->
+              <div style="background: var(--yellow); border-radius: var(--r-pill); padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 14px rgba(235, 248, 38, 0.45)">
+                <div style="display: flex; align-items: center; gap: 8px">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.4"><path d="M2 16h3l2-5h7l3 5h5M6 16a2 2 0 1 0 4 0M15 16a2 2 0 1 0 4 0M14 11V6l5 4"></path></svg>
+                  <span style="font-size: 14px; font-weight: 800; color: #000">Request a tow</span>
+                </div>
+                <div style="width: 26px; height: 26px; border-radius: 50%; background: #000; display: flex; align-items: center; justify-content: center; color: var(--yellow); font-size: 12px; font-weight: 800">↗</div>
+              </div>
+
+              <!-- Floating Pill Bottom Dock -->
+              <div style="background: #FFFFFF; border-radius: var(--r-pill); padding: 4px 12px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--line); margin-top: 2px">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--yellow); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(235, 248, 38, 0.4)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.4"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                </div>
+                <div style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#BCC0CA" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                </div>
+                <div style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#BCC0CA" stroke-width="2.2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- PHONE 2: Step 3 — Name Your Price & 4 Spec Tiles -->
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          
+          <!-- Screen 2 Inner Content -->
+          <div style="padding: 38px 16px 16px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; background: #F5F6F8">
+            
+            <!-- Screen 2 Top Bar -->
+            <div>
+              <div style="display: flex; align-items: center; justify-content: space-between">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: #FFFFFF; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.4"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </div>
+                <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: var(--r-pill); padding: 5px 14px; font-size: 12px; font-weight: 700; color: var(--black)">
+                  Step 3 of 3
+                </div>
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: #FFFFFF; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                </div>
+              </div>
+
+              <!-- 3 Progress Bars (All Filled) -->
+              <div style="display: flex; gap: 5px; margin-top: 12px">
+                <div style="flex: 1; height: 4px; border-radius: 2px; background: var(--yellow)"></div>
+                <div style="flex: 1; height: 4px; border-radius: 2px; background: var(--yellow)"></div>
+                <div style="flex: 1; height: 4px; border-radius: 2px; background: var(--yellow)"></div>
+              </div>
+            </div>
+
+            <!-- Vehicle Summary & Route Card -->
+            <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 20px; padding: 12px 14px; box-shadow: var(--shadow-sm); margin-top: 4px">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start">
+                <div>
+                  <div style="font-size: 18px; font-weight: 800; color: var(--black)">Toyota Corolla 2018</div>
+                  <div style="font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 1px">Breakdown · Locked steering</div>
+                </div>
+                <span style="background: #0B0C0E; color: var(--yellow); font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: var(--r-pill)">Sedan</span>
+              </div>
+              <div style="border-top: 1px solid var(--line); margin-top: 8px; padding-top: 8px; display: flex; justify-content: space-between; align-items: center">
+                <div style="font-size: 11.5px; font-weight: 600; color: var(--muted)">Wuse II → Garki Mechanic</div>
+                <span style="font-size: 11.5px; font-weight: 800; color: var(--black)">12.4 km</span>
+              </div>
+            </div>
+
+            <!-- 4-TILE SPEC GRID (Fare Guide, Required Truck, Wheel Status, Payment) -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 4px 0">
+              <!-- Tile 1 -->
+              <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 16px; padding: 8px 5px; text-align: left; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 2px">
+                <span style="font-size: 12px; font-weight: 800; color: var(--muted)">₦</span>
+                <span style="font-size: 8.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.3px">Guide</span>
+                <span style="font-size: 11px; font-weight: 800; color: var(--black)">18k–25k</span>
+              </div>
+              <!-- Tile 2 -->
+              <div style="background: #FFFFFF; border: 1.5px solid var(--yellow); border-radius: 16px; padding: 8px 5px; text-align: left; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 2px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.4"><path d="M2 15h15l3-4h2v4M2 15v2h20M6 17a2 2 0 1 0 4 0M15 17a2 2 0 1 0 4 0"></path></svg>
+                <span style="font-size: 8.5px; font-weight: 800; text-transform: uppercase; color: #000; letter-spacing: 0.3px">Truck</span>
+                <span style="font-size: 11px; font-weight: 800; color: var(--black)">Flatbed</span>
+              </div>
+              <!-- Tile 3 -->
+              <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 16px; padding: 8px 5px; text-align: left; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 2px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7E828D" stroke-width="2.4"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <span style="font-size: 8.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.3px">Wheels</span>
+                <span style="font-size: 11px; font-weight: 800; color: var(--black)">Locked</span>
+              </div>
+              <!-- Tile 4 -->
+              <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 16px; padding: 8px 5px; text-align: left; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 2px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7E828D" stroke-width="2.4"><path d="M17 2v4M7 2v4M2 11h20M5 19h14"></path></svg>
+                <span style="font-size: 8.5px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 0.3px">Pay by</span>
+                <span style="font-size: 11px; font-weight: 800; color: var(--black)">Transfer</span>
+              </div>
+            </div>
+
+            <!-- Interactive Offer Card -->
+            <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 22px; padding: 14px 16px; text-align: center; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 6px">
+              <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--muted); letter-spacing: 1px">Your Offer (Naira)</span>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 14px">
+                <div style="width: 34px; height: 34px; border-radius: 50%; background: #F5F6F8; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; color: var(--black); border: 1px solid var(--line)">−</div>
+                <div style="font-size: 30px; font-weight: 800; letter-spacing: -0.04em; color: var(--black)">₦ 20,000</div>
+                <div style="width: 34px; height: 34px; border-radius: 50%; background: #F5F6F8; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; color: var(--black); border: 1px solid var(--line)">+</div>
+              </div>
+              <div style="background: var(--yellowSoft); border-radius: var(--r-pill); padding: 4px 10px; font-size: 11px; font-weight: 700; color: #3A3D00; margin-top: 2px">
+                Fair offer · nearby operators respond in ~2 min
+              </div>
+            </div>
+
+            <!-- SLIDE-TO-CONFIRM CAPSULE TRACK -->
+            <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: var(--r-pill); padding: 5px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-md); margin-top: 6px">
+              <!-- Yellow Knob with Tow Hook -->
+              <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--yellow); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(235, 248, 38, 0.45)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M2 16h3l2-5h7l3 5h5M6 16a2 2 0 1 0 4 0M15 16a2 2 0 1 0 4 0M14 11V6l5 4"></path></svg>
+              </div>
+
+              <!-- Track text & chevrons -->
+              <div style="display: flex; align-items: center; gap: 6px">
+                <span style="font-size: 12px; font-weight: 800; color: var(--black); letter-spacing: -0.01em">Slide to request tow</span>
+                <span style="font-size: 13px; font-weight: 800; color: var(--muted); letter-spacing: 2px">›››</span>
+              </div>
+
+              <!-- Destination Check Circle -->
+              <div style="width: 44px; height: 44px; border-radius: 50%; background: #0B0C0E; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- PHONE 3: Live Tracking & 4-Digit Start Code -->
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          
+          <!-- Screen 3 Inner Content (Map + Bottom Sheet) -->
+          <div style="flex: 1; display: flex; flex-direction: column; background: #EEF0F4; position: relative; overflow: hidden">
+            
+            <!-- Map Top Bar Overlay -->
+            <div style="position: absolute; top: 38px; left: 16px; right: 16px; z-index: 10; display: flex; align-items: center; justify-content: space-between">
+              <div style="width: 36px; height: 36px; border-radius: 50%; background: #FFFFFF; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.4"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              </div>
+
+              <!-- Segmented Capsule (Matched Status) -->
+              <div style="background: #FFFFFF; border-radius: var(--r-pill); padding: 4px 12px; display: flex; align-items: center; gap: 6px; box-shadow: var(--shadow-sm); border: 1px solid var(--line)">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); box-shadow: 0 0 0 3px rgba(235, 248, 38, 0.5)"></span>
+                <span style="font-size: 12px; font-weight: 800; color: var(--black)">Truck en route</span>
+              </div>
+
+              <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--yellow); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(235,248,38,0.4)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.4"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              </div>
+            </div>
+
+            <!-- Live Tracking Route Canvas -->
+            <div style="flex: 1; position: relative">
+              <svg width="100%" height="280" viewBox="0 0 295 280" style="position: absolute; top: 0; left: 0">
+                <path d="M-20 120 L315 140" stroke="#FFFFFF" stroke-width="18"/>
+                <path d="M90 -20 L70 300" stroke="#FFFFFF" stroke-width="16"/>
+                <path d="M-20 220 L315 210" stroke="#FFFFFF" stroke-width="14"/>
+
+                <!-- Dashed Tow Route -->
+                <path d="M40 180 L110 135 L190 120 L245 90" stroke="#000000" stroke-width="3.5" stroke-dasharray="5 5" fill="none"/>
+                
+                <!-- Pickup Node (Wuse II) -->
+                <circle cx="40" cy="180" r="7" fill="#000000" stroke="#FFFFFF" stroke-width="3"/>
+                <g transform="translate(14, 194)">
+                  <rect width="52" height="16" rx="8" fill="#0B0C0E"/>
+                  <text x="26" y="11" fill="#FFFFFF" font-size="8" font-weight="700" text-anchor="middle">Pickup</text>
+                </g>
+
+                <!-- Approaching Tow Truck Marker -->
+                <g transform="translate(138, 106)">
+                  <circle cx="18" cy="18" r="18" fill="#EBF826" filter="drop-shadow(0 4px 12px rgba(0,0,0,0.25))"/>
+                  <path d="M11 20 L13 14 L23 14 L25 20 Z" fill="#0B0C0E"/>
+                  <circle cx="13" cy="21" r="2.2" fill="#0B0C0E"/>
+                  <circle cx="23" cy="21" r="2.2" fill="#0B0C0E"/>
+                </g>
+                <g transform="translate(108, 76)">
+                  <rect width="96" height="20" rx="10" fill="#0B0C0E"/>
+                  <text x="48" y="13" fill="#FFFFFF" font-size="8.5" font-weight="800" text-anchor="middle">Musa · 4 min away</text>
+                </g>
+
+                <!-- Drop-off Mechanic Pin -->
+                <g transform="translate(230, 75)">
+                  <circle cx="15" cy="15" r="14" fill="#FFFFFF" stroke="#0B0C0E" stroke-width="2"/>
+                  <circle cx="15" cy="15" r="6" fill="#0B0C0E"/>
+                </g>
+              </svg>
+            </div>
+
+            <!-- Slide-up Bottom Sheet (Trust & 4-Digit Start Code) -->
+            <div style="background: #FFFFFF; border-radius: 32px 32px 0 0; padding: 16px 16px 14px; box-shadow: 0 -10px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 10px; z-index: 20">
+              
+              <!-- Operator Profile Row -->
+              <div style="display: flex; justify-content: space-between; align-items: center">
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--yellow); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; color: #000">
+                    M
+                  </div>
+                  <div>
+                    <div style="font-size: 15px; font-weight: 800; color: var(--black)">Musa Ibrahim ★ 4.9</div>
+                    <div style="font-size: 11.5px; font-weight: 600; color: var(--muted)">Isuzu NPR Flatbed · ABJ-842-XY</div>
+                  </div>
+                </div>
+                <span style="font-size: 16px; font-weight: 800; color: var(--black)">₦ 20,000</span>
+              </div>
+
+              <!-- THE 4-DIGIT START CODE CARD (Signature Security Feature) -->
+              <div style="background: #FDFEE8; border: 1.5px solid var(--yellow); border-radius: 18px; padding: 10px 14px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(235, 248, 38, 0.2)">
+                <div style="display: flex; align-items: center; gap: 6px">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: #000"></span>
+                  <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #3A3D00; letter-spacing: 1px">Your 4-Digit Start Code</span>
+                </div>
+                <!-- 4 Digit Code in Big Bold Font -->
+                <div style="font-size: 26px; font-weight: 800; letter-spacing: 10px; color: #0B0C0E; margin-left: 10px">
+                  5 9 1 4
+                </div>
+                <div style="font-size: 10px; font-weight: 600; color: #5F6110; line-height: 1.3">
+                  Only reveal to Musa once you confirm the truck plate and loading.
+                </div>
+              </div>
+
+              <!-- Dual Action Capsule -->
+              <div style="background: #F5F6F8; border-radius: var(--r-pill); padding: 4px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--line)">
+                <!-- Yellow Call Button -->
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--yellow); display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(235, 248, 38, 0.4)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.4"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                </div>
+
+                <!-- Chevrons track -->
+                <div style="font-size: 11px; font-weight: 800; color: var(--muted); letter-spacing: 1px">
+                  PAY ON DELIVERY ››
+                </div>
+
+                <!-- Black Confirm Delivery Action Button -->
+                <div style="height: 40px; padding: 0 16px; border-radius: var(--r-pill); background: var(--black); display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.25)">
+                  <span style="font-size: 12px; font-weight: 800; color: #FFFFFF">Delivered</span>
+                  <div style="width: 18px; height: 18px; border-radius: 50%; background: var(--yellow); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #000">✓</div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section (Precision 3 Cards) -->
+  <section id="how" style="background: #FFFFFF; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 90px 24px">
+    <div style="max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px">
+      <div style="display: flex; flex-direction: column; gap: 12px; max-width: 600px">
+        <span style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: var(--muted); letter-spacing: 1px">Direct & Transparent</span>
+        <h2 style="margin: 0; font-size: 46px; font-weight: 800; letter-spacing: -0.03em">How Townaija works</h2>
+        <p style="margin: 0; font-size: 18px; color: var(--muted); line-height: 1.5">No roadside extortion. No ringing 10 private numbers. Name your price, review verified offers, and pick the best operator.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px">
+        <!-- Step 1 -->
+        <div style="background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-card); padding: 36px 32px; display: flex; flex-direction: column; gap: 20px; transition: transform 0.2s">
+          <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--yellow); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: #000; box-shadow: 0 4px 14px rgba(235, 248, 38, 0.4)">
+            01
+          </div>
+          <div>
+            <h3 style="margin: 0 0 10px; font-size: 24px; font-weight: 800; letter-spacing: -0.02em">Name your price</h3>
+            <p style="margin: 0; font-size: 16px; line-height: 1.6; color: var(--muted)">Drop a pin where your vehicle is and where it should go. We give an honest recommended price based on distance and vehicle condition.</p>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div style="background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-card); padding: 36px 32px; display: flex; flex-direction: column; gap: 20px; transition: transform 0.2s">
+          <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--black); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: #fff">
+            02
+          </div>
+          <div>
+            <h3 style="margin: 0 0 10px; font-size: 24px; font-weight: 800; letter-spacing: -0.02em">Choose your operator</h3>
+            <p style="margin: 0; font-size: 16px; line-height: 1.6; color: var(--muted)">Verified operators close to your location accept or counter. Compare ratings, truck type, arrival ETA, and quotes before deciding.</p>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div style="background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-card); padding: 36px 32px; display: flex; flex-direction: column; gap: 20px; transition: transform 0.2s">
+          <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--yellow); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: #000; box-shadow: 0 4px 14px rgba(235, 248, 38, 0.4)">
+            03
+          </div>
+          <div>
+            <h3 style="margin: 0 0 10px; font-size: 24px; font-weight: 800; letter-spacing: -0.02em">Track, verify, pay</h3>
+            <p style="margin: 0; font-size: 16px; line-height: 1.6; color: var(--muted)">Watch the truck arrive live on the map. Give your 4-digit start code to begin the tow. Pay directly by cash or transfer upon safe delivery.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Right Truck Section -->
+  <section style="max-width: 1240px; margin: 0 auto; padding: 90px 24px; display: flex; flex-wrap: wrap; gap: 48px; align-items: center">
+    <div style="flex: 1 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+      <span style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: var(--muted); letter-spacing: 1px">Precision Fleet Matching</span>
+      <h2 style="margin: 0; font-size: 46px; line-height: 1.08; font-weight: 800; letter-spacing: -0.03em">The right truck for your exact vehicle</h2>
+      <p style="margin: 0; font-size: 18px; line-height: 1.6; color: var(--muted)">Whether your sedan rolled into a ditch or an AWD SUV has locked steering, our backend filters operators by certified capabilities. Locked wheels are strictly matched with flatbeds.</p>
+    </div>
+
+    <div style="flex: 1 1 500px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+      <!-- Wheel-lift -->
+      <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 24px; padding: 22px 24px; display: flex; align-items: center; gap: 20px; box-shadow: var(--shadow-sm)">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"><path d="M3 16h2l2-5h7l3 5h4M7 16a2 2 0 1 0 4 0M15 16a2 2 0 1 0 4 0M14 11V6l5 4M19 10v3"></path></svg>
+        </div>
+        <div style="flex: 1">
+          <div style="font-size: 19px; font-weight: 800; color: var(--black)">Wheel-lift Towing</div>
+          <div style="font-size: 14px; color: var(--muted); margin-top: 2px">Lifts front or rear axle. Fast, agile solution for rolling saloon cars.</div>
+        </div>
+      </div>
+
+      <!-- Flatbed -->
+      <div style="background: #FFFFFF; border: 1.5px solid var(--yellow); border-radius: 24px; padding: 22px 24px; display: flex; align-items: center; gap: 20px; box-shadow: var(--shadow-md)">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--yellow); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 14px rgba(235, 248, 38, 0.4)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"><path d="M2 15h15l3-4h2v4M2 15v2h20M6 17a2 2 0 1 0 4 0M15 17a2 2 0 1 0 4 0M5 15l2-3h6l1 3"></path></svg>
+        </div>
+        <div style="flex: 1">
+          <div style="display: flex; align-items: center; gap: 8px">
+            <span style="font-size: 19px; font-weight: 800; color: var(--black)">Flatbed Carrier</span>
+            <span style="background: var(--black); color: var(--yellow); font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: var(--r-pill); text-transform: uppercase">Most Popular</span>
+          </div>
+          <div style="font-size: 14px; color: var(--muted); margin-top: 2px">Carries entire vehicle on bed. Essential for 4WD/AWD SUVs, luxury cars, and locked axles.</div>
+        </div>
+      </div>
+
+      <!-- Heavy-duty -->
+      <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 24px; padding: 22px 24px; display: flex; align-items: center; gap: 20px; box-shadow: var(--shadow-sm)">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"><path d="M1 16h4V8h9v8h2l2-4h5v4M1 16v1h22M4 17a2 2 0 1 0 4 0M11 17a2 2 0 1 0 4 0M18 17a2 2 0 1 0 4 0"></path></svg>
+        </div>
+        <div style="flex: 1">
+          <div style="font-size: 19px; font-weight: 800; color: var(--black)">Heavy-Duty Recovery</div>
+          <div style="font-size: 14px; color: var(--muted); margin-top: 2px">Heavy winches and high-tonnage recovery for commercial buses, haulage trucks, and tankers.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tow Operators Band (Pitch Obsidian with Canary Yellow Highlights) -->
+  <section id="operators" style="background: #0B0C0E; color: #FFFFFF; padding: 100px 24px">
+    <div style="max-width: 1240px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 56px; align-items: center">
+      <div style="flex: 1 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+        <span style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: var(--yellow); letter-spacing: 1.5px">For Tow Operators</span>
+        <h2 style="margin: 0; font-size: 52px; line-height: 1.05; font-weight: 800; letter-spacing: -0.04em">Own a tow truck? Get real jobs near you.</h2>
+        <p style="margin: 0; font-size: 18px; line-height: 1.6; color: #A0A3AB">Stop parking idle on the highway. Switch your app online, receive compatible breakdown alerts within 15 km, quote your terms, and get paid directly.</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px">
+          <a href="#download" style="background: var(--yellow); color: #000000; font-size: 16px; font-weight: 800; padding: 16px 28px; border-radius: var(--r-pill); box-shadow: 0 4px 18px rgba(235, 248, 38, 0.4); display: inline-flex; align-items: center; gap: 8px">
+            Become an operator
+            <span style="width: 22px; height: 22px; border-radius: 50%; background: #000; color: var(--yellow); display: inline-flex; align-items: center; justify-content: center; font-size: 13px">↗</span>
+          </a>
+          <a href="#faq" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #FFFFFF; font-size: 16px; font-weight: 600; padding: 16px 24px; border-radius: var(--r-pill)">Requirements</a>
+        </div>
+      </div>
+
+      <!-- 4 Rounded Obsidian Feature Cards -->
+      <div style="flex: 1 1 440px; min-width: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px">
+        <div style="background: #14161A; border: 1px solid #24262E; border-radius: 24px; padding: 26px; display: flex; flex-direction: column; gap: 10px">
+          <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(235,248,38,0.12); color: var(--yellow); display: flex; align-items: center; justify-content: center; font-weight: 800">₦</div>
+          <div style="font-size: 18px; font-weight: 800">You set the price</div>
+          <div style="font-size: 14px; line-height: 1.5; color: #8C909B">Accept the customer's offer or send your counter. Total freedom.</div>
+        </div>
+
+        <div style="background: #14161A; border: 1px solid #24262E; border-radius: 24px; padding: 26px; display: flex; flex-direction: column; gap: 10px">
+          <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(235,248,38,0.12); color: var(--yellow); display: flex; align-items: center; justify-content: center; font-weight: 800">⚡</div>
+          <div style="font-size: 18px; font-weight: 800">Paid directly</div>
+          <div style="font-size: 14px; line-height: 1.5; color: #8C909B">Customer pays you cash or direct transfer immediately upon delivery.</div>
+        </div>
+
+        <div style="background: #14161A; border: 1px solid #24262E; border-radius: 24px; padding: 26px; display: flex; flex-direction: column; gap: 10px">
+          <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(235,248,38,0.12); color: var(--yellow); display: flex; align-items: center; justify-content: center; font-weight: 800">%</div>
+          <div style="font-size: 18px; font-weight: 800">[COMMISSION]% only</div>
+          <div style="font-size: 14px; line-height: 1.5; color: #8C909B">Zero registration fee. Small fee deducted from your prepaid balance.</div>
+        </div>
+
+        <div style="background: #14161A; border: 1px solid #24262E; border-radius: 24px; padding: 26px; display: flex; flex-direction: column; gap: 10px">
+          <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(235,248,38,0.12); color: var(--yellow); display: flex; align-items: center; justify-content: center; font-weight: 800">✓</div>
+          <div style="font-size: 18px; font-weight: 800">Flexible hours</div>
+          <div style="font-size: 14px; line-height: 1.5; color: #8C909B">Go online whenever you want. You only see jobs your truck handles.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Safety & Trust Built-in -->
+  <section id="safety" style="max-width: 1240px; margin: 0 auto; padding: 90px 24px; display: flex; flex-direction: column; gap: 44px">
+    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 600px">
+      <span style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: var(--muted); letter-spacing: 1px">Roadside Security</span>
+      <h2 style="margin: 0; font-size: 46px; font-weight: 800; letter-spacing: -0.03em">Built for total trust on the road</h2>
+      <p style="margin: 0; font-size: 18px; color: var(--muted); line-height: 1.5">Handing over your vehicle is high stakes. We engineered security into every step of the journey.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px">
+      <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 24px; padding: 32px 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: var(--shadow-sm)">
+        <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--yellow); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(235,248,38,0.4)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"></path><path d="M9 12l2 2 4-4"></path></svg>
+        </div>
+        <div style="font-size: 20px; font-weight: 800">Verified operators</div>
+        <div style="font-size: 15px; line-height: 1.55; color: var(--muted)">Every operator's driver license, national ID, and truck documents are personally inspected before approval.</div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 24px; padding: 32px 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: var(--shadow-sm)">
+        <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--yellow); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(235,248,38,0.4)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+        </div>
+        <div style="font-size: 20px; font-weight: 800">4-Digit Start Code</div>
+        <div style="font-size: 15px; line-height: 1.55; color: var(--muted)">The tow cannot legally start without your code. Only reveal it once you inspect the truck plate and confirm loading.</div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 24px; padding: 32px 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: var(--shadow-sm)">
+        <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--yellow); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(235,248,38,0.4)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>
+        </div>
+        <div style="font-size: 20px; font-weight: 800">Mandatory photo logs</div>
+        <div style="font-size: 15px; line-height: 1.55; color: var(--muted)">Condition photos before hookup and at drop-off create an indelible record in the database for any claims.</div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 24px; padding: 32px 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: var(--shadow-sm)">
+        <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--yellow); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(235,248,38,0.4)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+        </div>
+        <div style="font-size: 20px; font-weight: 800">Real-time GPS tracking</div>
+        <div style="font-size: 15px; line-height: 1.55; color: var(--muted)">Watch the tow truck's approach on the live map in real time, from match acceptance right to the drop-off mechanic.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download CTA Banner -->
+  <section id="download" style="max-width: 1240px; margin: 0 auto; padding: 0 24px 90px">
+    <div style="background: #111215; border-radius: 36px; padding: 60px 48px; display: flex; flex-wrap: wrap; gap: 40px; align-items: center; justify-content: space-between; box-shadow: var(--shadow-lg); color: #fff; position: relative; overflow: hidden">
+      <div style="flex: 1 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <span style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: var(--yellow); letter-spacing: 1px">Always prepared</span>
+        <h2 style="margin: 0; font-size: 48px; line-height: 1.06; font-weight: 800; letter-spacing: -0.03em">Install Townaija today</h2>
+        <p style="margin: 0; font-size: 18px; color: #9DA0A8; line-height: 1.5">One app for stranded drivers and certified tow truck operators. Keep it ready before you hit the road.</p>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 14px">
+        <a href="/Townaija.apk" download="Townaija.apk" style="background: var(--yellow); color: #000000; text-decoration: none; padding: 14px 28px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 14px; box-shadow: 0 4px 18px rgba(235, 248, 38, 0.45)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2"><rect x="6" y="2" width="12" height="20" rx="2"></rect><path d="M12 7v7M9 11l3 3 3-3M10 18h4"></path></svg>
+          <div style="text-align: left">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #4B4D08">Download for</div>
+            <div style="font-size: 17px; font-weight: 800">Android APK</div>
+          </div>
+        </a>
+
+        <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); padding: 14px 28px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 14px; color: #8F939D">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8F939D" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"></path></svg>
+          <div style="text-align: left">
+            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase">iOS Version</div>
+            <div style="font-size: 16px; font-weight: 700; color: #fff">Coming Soon</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" style="background: #FFFFFF; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 90px 24px">
+    <div style="max-width: 1240px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 56px">
+      <div style="flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <span style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: var(--muted); letter-spacing: 1px">Answers</span>
+        <h2 style="margin: 0; font-size: 46px; font-weight: 800; letter-spacing: -0.03em">Frequently asked questions</h2>
+        <p style="margin: 0; font-size: 17px; color: var(--muted); line-height: 1.5">Everything you need to know about pricing, coverage, and operator onboarding.</p>
+      </div>
+
+      <div style="flex: 2 1 540px; min-width: 0; display: flex; flex-direction: column">
+        <details style="border-top: 1px solid var(--line); padding: 24px 0">
+          <summary style="font-size: 19px; font-weight: 800">How much does a tow cost?</summary>
+          <p style="margin: 12px 0 0; font-size: 16px; line-height: 1.6; color: var(--muted)">You specify what you wish to offer. The app calculates a transparent recommended fare based on actual route mileage and the truck classification your vehicle requires. Nearby operators accept or counter. You only pay what you confirmed.</p>
+        </details>
+
+        <details style="border-top: 1px solid var(--line); padding: 24px 0">
+          <summary style="font-size: 19px; font-weight: 800">How do I pay the operator?</summary>
+          <p style="margin: 12px 0 0; font-size: 16px; line-height: 1.6; color: var(--muted)">You pay the operator directly via cash or immediate Nigerian bank transfer once your car is delivered at your destination. Confirm payment in the app to finalize the job.</p>
+        </details>
+
+        <details style="border-top: 1px solid var(--line); padding: 24px 0">
+          <summary style="font-size: 19px; font-weight: 800">Where is Townaija live?</summary>
+          <p style="margin: 12px 0 0; font-size: 16px; line-height: 1.6; color: var(--muted)">We are active in Abuja and surrounding major corridors today. Lagos, Port Harcourt, and Ibadan rollouts follow shortly.</p>
+        </details>
+
+        <details style="border-top: 1px solid var(--line); padding: 24px 0">
+          <summary style="font-size: 19px; font-weight: 800">What are the requirements to drive with Townaija?</summary>
+          <p style="margin: 12px 0 0; font-size: 16px; line-height: 1.6; color: var(--muted)">You need a certified tow vehicle (wheel-lift, flatbed, or heavy-duty), valid driver's licence, government ID, and an Android device. Register inside the app and upload clear documents for 24-hour verification.</p>
+        </details>
+
+        <details style="border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 24px 0">
+          <summary style="font-size: 19px; font-weight: 800">What if my vehicle is scratched or damaged?</summary>
+          <p style="margin: 12px 0 0; font-size: 16px; line-height: 1.6; color: var(--muted)">Tap "Report a problem" inside your completed or active job screen. Our dispute desk immediately audits the pre-tow condition photos against the delivery photos and steps in.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer (Obsidian Black with Canary Accents) -->
+  <footer style="background: #0B0C0E; color: #FFFFFF; padding: 72px 24px 44px">
+    <div style="max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px">
+      <div style="display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between">
+        <div style="display: flex; flex-direction: column; gap: 14px; flex: 1 1 260px">
+          <div style="display: flex; align-items: center; gap: 10px">
+            <span style="width: 34px; height: 34px; border-radius: var(--r-pill); background: var(--yellow); display: flex; align-items: center; justify-content: center">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.4"><path d="M2 16h3l2-5h7l3 5h5M6 16a2 2 0 1 0 4 0M15 16a2 2 0 1 0 4 0M14 11V6l5 4"></path></svg>
+            </span>
+            <span style="font-size: 24px; font-weight: 800; letter-spacing: -0.03em">Townaija</span>
+          </div>
+          <span style="font-size: 15px; color: #8F939E; line-height: 1.5">Direct on-demand towing infrastructure across Nigeria.</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 15px; flex: 0 1 180px">
+          <span style="font-weight: 800; color: #FFFFFF">Platform</span>
+          <a href="#how" style="color: #8F939E; transition: color 0.2s">How it works</a>
+          <a href="#app-preview" style="color: #8F939E; transition: color 0.2s">The Mobile App</a>
+          <a href="#safety" style="color: #8F939E; transition: color 0.2s">Safety & Trust</a>
+          <a href="#download" style="color: #8F939E; transition: color 0.2s">Download APK</a>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 15px; flex: 0 1 180px">
+          <span style="font-weight: 800; color: #FFFFFF">Operators</span>
+          <a href="#operators" style="color: #8F939E; transition: color 0.2s">Drive with Townaija</a>
+          <a href="#faq" style="color: #8F939E; transition: color 0.2s">Requirements</a>
+          <a href="/admin/" style="color: #8F939E; transition: color 0.2s">Admin Console</a>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 15px; flex: 0 1 220px">
+          <span style="font-weight: 800; color: #FFFFFF">Support</span>
+          <span style="color: #afafaf">[SUPPORT PHONE]</span>
+          <span style="color: #afafaf">[SUPPORT EMAIL]</span>
+        </div>
+      </div>
+
+      <div style="border-top: 1px solid #1E2026; padding-top: 28px; display: flex; flex-wrap: wrap; gap: 14px 28px; justify-content: space-between; font-size: 14px; color: #6E727D">
+        <span>© 2026 Townaija Technologies · Abuja, Nigeria</span>
+        <div style="display: flex; gap: 20px">
+          <span>Terms of Service</span>
+          <span>Privacy Policy</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

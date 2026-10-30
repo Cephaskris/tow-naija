@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Townaija",
+    "slug": "townaija",
+    "version": "1.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "android": {
+      "package": "ng.townaija.app",
+      "versionCode": 2,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F5EF3A"
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "VIBRATE"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "backgroundColor": "#EDEDED"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Townaija uses your location to find tow trucks near you and to share an operator's position during a job."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Townaija uses the camera to photograph vehicles and documents.",
+          "photosPermission": "Townaija lets you attach photos of your vehicle and documents."
+        }
+      ]
+    ],
+    "backgroundColor": "#EDEDED"
+  }
+}

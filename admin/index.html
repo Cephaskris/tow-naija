@@ -1,0 +1,1060 @@
+<title>Townaija Admin</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: Uber Base-style console — black top bar, white side navigation, flat neutral surfaces.
+   Pure neutral greys (Base scale), black type, 8px corners; Nigerian green only for primary actions. */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #eceef2;
+  --line: #eaecef;
+  --fg: #0b0c0e;
+  --muted: #7e828d;
+  --faint: #bcc0ca;
+  --chrome: #0b0c0e;
+  --chrome-fg: #ffffff;
+  --chrome-muted: #8e929e;
+  --green: #ebf826;
+  --green-ink: #000000;
+  --green-soft: #fcfde5;
+  --on-green: #000000;
+  --amber: #f59e0b;
+  --amber-soft: #fffbeb;
+  --red: #ef4444;
+  --red-soft: #fef2f2;
+  --blue: #3b82f6;
+  --blue-soft: #eff6ff;
+  --shadow: 0 8px 30px rgba(0, 0, 0, .05);
+  --font: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --r: 16px;
+  --r-pill: 9999px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b0c0e; --surface: #14161a; --surface-2: #1e2026; --line: #262830; --fg: #ffffff; --muted: #8e929e; --faint: #5a5e6b;
+    --chrome: #070709; --chrome-fg: #ffffff; --chrome-muted: #8e929e;
+    --green: #ebf826; --green-ink: #000000; --green-soft: rgba(235,248,38,0.16); --on-green: #000000;
+    --amber: #f59e0b; --amber-soft: #2e2510; --red: #ef4444; --red-soft: #3a1612; --blue: #3b82f6; --blue-soft: #14213d;
+    --shadow: 0 8px 30px rgba(0,0,0,.6); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b0c0e; --surface: #14161a; --surface-2: #1e2026; --line: #262830; --fg: #ffffff; --muted: #8e929e; --faint: #5a5e6b;
+  --chrome: #070709; --chrome-fg: #ffffff; --chrome-muted: #8e929e;
+  --green: #ebf826; --green-ink: #000000; --green-soft: rgba(235,248,38,0.16); --on-green: #000000;
+  --amber: #f59e0b; --amber-soft: #2e2510; --red: #ef4444; --red-soft: #3a1612; --blue: #3b82f6; --blue-soft: #14213d;
+  --shadow: 0 8px 30px rgba(0,0,0,.6); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.45 var(--font); -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--chrome); }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: inherit; }
+.num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+
+/* Shell: black top bar + white side nav */
+.shell { min-height: 100%; display: flex; flex-direction: column; }
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; height: 64px; background: var(--chrome); color: var(--chrome-fg); display: flex; align-items: center; gap: 16px; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-mark { width: 32px; height: 32px; border-radius: 50%; background: var(--green); display: grid; place-items: center; color: #000; box-shadow: 0 2px 10px rgba(235,248,38,0.4); }
+.brand-mark svg { stroke: #000 !important; }
+.brand-name { font-weight: 800; font-size: 20px; letter-spacing: -.02em; }
+.brand-sub { font-size: 14px; color: var(--chrome-muted); font-weight: 500; padding-left: 12px; margin-left: 2px; border-left: 1px solid #333; }
+.top-right { margin-left: auto; display: flex; align-items: center; gap: 14px; font-size: 13px; color: var(--chrome-muted); }
+.top-right b { color: var(--chrome-fg); font-weight: 600; }
+.top-right button { background: #1f1f1f; border: 0; color: var(--chrome-fg); border-radius: 999px; padding: 8px 14px; cursor: pointer; font-weight: 600; }
+.top-right button:hover { background: #333; }
+.body { flex: 1; display: grid; grid-template-columns: 240px minmax(0, 1fr); }
+.side { border-right: 1px solid var(--line); padding: 16px 12px; position: sticky; top: calc(64px + env(safe-area-inset-top, 0px)); height: calc(100vh - 64px); overflow-y: auto; background: var(--bg); }
+.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav a { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: var(--r-pill); text-decoration: none; color: var(--muted); font-weight: 600; font-size: 14px; }
+.nav a:hover { background: var(--surface); color: var(--fg); }
+.nav a.active { background: var(--surface-2); color: var(--fg); font-weight: 700; }
+.nav a svg { width: 20px; height: 20px; flex: none; }
+.nav .count { margin-left: auto; background: var(--fg); color: var(--bg); border-radius: 99px; font-size: 12px; padding: 1px 8px; font-weight: 600; }
+
+.main { min-width: 0; padding-block: 32px 64px; padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+.page-head h1 { margin: 0; font-size: 32px; line-height: 1.15; letter-spacing: -.02em; font-weight: 700; text-wrap: balance; }
+.page-head p { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+.demo-bar { background: var(--surface); border-radius: var(--r); padding: 12px 16px; margin-bottom: 24px; font-weight: 600; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; border-left: 4px solid var(--amber); }
+.demo-bar span { font-weight: 400; color: var(--muted); }
+
+/* Controls (Rounded pill buttons, yellow primary with black text) */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: var(--r-pill); min-height: 44px; padding: 0 20px; font-weight: 700; font-size: 14px; cursor: pointer; background: var(--surface-2); color: var(--fg); white-space: nowrap; }
+.btn:hover { background: var(--line); }
+.btn.primary { background: var(--green); color: #000000; font-weight: 800; box-shadow: 0 3px 12px rgba(235,248,38,0.35); }
+.btn.primary:hover { background: #d6e21d; }
+.btn.danger { background: var(--red-soft); color: var(--red); }
+.btn.danger:hover { background: var(--red-soft); filter: brightness(.97); }
+.btn.ghost { background: transparent; }
+.btn.ghost:hover { background: var(--surface); }
+.btn.sm { min-height: 36px; padding: 0 14px; font-size: 14px; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+.input, select.input, textarea.input { width: 100%; border: 2px solid transparent; background: var(--surface-2); border-radius: var(--r); padding: 10px 14px; min-height: 44px; }
+.input:focus { border-color: var(--fg); outline: none; background: var(--bg); }
+label.field { display: flex; flex-direction: column; gap: 8px; font-weight: 600; font-size: 14px; }
+label.field small { font-weight: 400; color: var(--muted); font-size: 13px; }
+.toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+.toolbar .input { max-width: 300px; }
+/* Base tabs: underline */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); flex-wrap: wrap; flex: 1 1 auto; }
+.tabs button { border: 0; background: transparent; padding: 12px 14px; font-weight: 500; font-size: 15px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tabs button:hover { color: var(--fg); }
+.tabs button.on { color: var(--fg); font-weight: 600; border-bottom-color: var(--fg); }
+.tabs .num { color: var(--faint); margin-left: 4px; }
+.tabs button.on .num { color: var(--muted); }
+
+/* KPIs */
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 32px; }
+@media (min-width: 1360px) { .kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kpi { background: var(--surface); border-radius: var(--r); padding: 18px; display: flex; flex-direction: column; gap: 4px; }
+.kpi .label { color: var(--muted); font-size: 14px; font-weight: 500; }
+.kpi .value { font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; }
+.kpi .sub { font-size: 13px; color: var(--muted); }
+.kpi.live .value::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--green); margin-right: 10px; vertical-align: middle; }
+
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 24px; margin-bottom: 32px; }
+.panel { min-width: 0; }
+.panel h2, .section-title { margin: 0 0 14px; font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+.panel h2 small, .section-title small { color: var(--muted); font-weight: 500; font-size: 14px; margin-left: 6px; }
+.panel.boxed { border: 1px solid var(--line); border-radius: var(--r); padding: 20px; }
+.attn { display: flex; flex-direction: column; }
+.attn a { display: flex; align-items: center; gap: 14px; padding: 14px 4px; text-decoration: none; border-bottom: 1px solid var(--line); }
+.attn a:first-child { border-top: 1px solid var(--line); }
+.attn a:hover { background: var(--surface); }
+.attn .n { font-weight: 700; font-size: 22px; min-width: 36px; }
+.attn .t { flex: 1; }
+.attn .t b { display: block; font-weight: 600; font-size: 15px; }
+.attn .t span { color: var(--muted); font-size: 13px; }
+
+/* Chart */
+.chart svg { width: 100%; height: auto; display: block; }
+.legend { display: flex; gap: 18px; font-size: 13px; color: var(--muted); margin-top: 8px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+
+/* Tables (Base table: bold header, hairline rows) */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); }
+table { width: 100%; border-collapse: collapse; min-width: 720px; }
+th { text-align: left; font-size: 14px; color: var(--fg); font-weight: 600; padding: 14px 16px; background: var(--bg); border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 14px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; font-size: 14px; }
+tr:last-child td { border-bottom: 0; }
+tbody tr.click { cursor: pointer; }
+tbody tr.click:hover td { background: var(--surface); }
+td .sub { color: var(--muted); font-size: 13px; }
+.empty { padding: 40px 16px; text-align: center; color: var(--muted); }
+
+/* Base tags */
+.chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; background: var(--surface-2); color: var(--fg); }
+.chip.green { background: var(--green-soft); color: var(--green); }
+.chip.amber { background: var(--amber-soft); color: var(--amber); }
+.chip.red { background: var(--red-soft); color: var(--red); }
+.chip.blue { background: var(--blue-soft); color: var(--blue); }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--faint); }
+.dot.on { background: var(--green); }
+
+/* Drawer + modal */
+.scrim { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 40; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 100%); background: var(--bg); z-index: 41; box-shadow: var(--shadow); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); padding-right: env(safe-area-inset-right, 0px); }
+.drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 24px 24px 16px; border-bottom: 1px solid var(--line); }
+.drawer-head h3 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -.02em; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.drawer-head p { margin: 6px 0 0; color: var(--muted); }
+.drawer-body { overflow-y: auto; padding: 20px 24px 32px; display: flex; flex-direction: column; gap: 24px; }
+.x { border: 0; background: var(--surface-2); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 20px; flex: none; }
+.x:hover { background: var(--line); }
+.section h4 { margin: 0 0 12px; font-size: 16px; font-weight: 700; color: var(--fg); }
+.section h4 span { font-weight: 700; }
+.kv { display: grid; grid-template-columns: 140px 1fr; gap: 10px 16px; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; font-weight: 500; min-width: 0; overflow-wrap: anywhere; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+.photos figure { margin: 0; }
+.photos a, .photos .ph { display: block; aspect-ratio: 4/3; border-radius: var(--r); overflow: hidden; background: var(--surface-2); max-width: 100%; }
+.photos img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photos .ph { display: grid; place-items: center; color: var(--muted); font-size: 12px; text-align: center; padding: 8px; }
+.photos figcaption { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.timeline { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.timeline li { display: grid; grid-template-columns: 14px 1fr auto; gap: 12px; padding-bottom: 16px; position: relative; }
+.timeline li::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--fg); margin-top: 5px; }
+.timeline li:first-child::before { background: var(--green); }
+.timeline li:not(:last-child)::after { content: ""; position: absolute; left: 4px; top: 18px; bottom: 0; width: 2px; background: var(--line); }
+.timeline .when { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.route { display: grid; grid-template-columns: 14px 1fr; gap: 4px 10px; }
+.route .pin { width: 10px; height: 10px; margin-top: 5px; background: var(--fg); }
+.route .pin.a { border-radius: 50%; }
+.route .stem { width: 2px; background: var(--line); margin-left: 4px; min-height: 14px; }
+.modal { position: fixed; inset: 0; display: grid; place-items: center; z-index: 60; padding: 16px; }
+.modal .scrim { z-index: 0; }
+.modal .card { background: var(--bg); border-radius: 12px; box-shadow: var(--shadow); width: min(440px, 100%); padding: 24px; display: flex; flex-direction: column; gap: 16px; position: relative; z-index: 1; }
+.modal h3 { margin: 0; font-size: 20px; font-weight: 700; }
+.modal p { margin: 0; color: var(--muted); }
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 12px 18px; border-radius: var(--r); font-weight: 600; z-index: 80; box-shadow: var(--shadow); max-width: calc(100% - 32px); }
+.toast.err { background: var(--red); color: #fff; }
+
+/* Settings */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; }
+.stack { display: flex; flex-direction: column; gap: 36px; }
+.stack > section + section { border-top: 1px solid var(--line); padding-top: 32px; }
+
+/* Auth */
+.auth { min-height: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+.auth-art { background: var(--chrome); color: var(--chrome-fg); padding: 48px; display: flex; flex-direction: column; justify-content: space-between; }
+.auth-art h2 { font-size: 48px; line-height: 1.05; letter-spacing: -.03em; font-weight: 700; margin: 0; max-width: 12ch; text-wrap: balance; }
+.auth-art p { color: var(--chrome-muted); max-width: 40ch; font-size: 16px; }
+.auth-form { display: grid; place-items: center; padding: 40px 24px; }
+.auth-card { width: min(400px, 100%); display: flex; flex-direction: column; gap: 18px; }
+.auth-card h1 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -.02em; }
+.sec-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #15803d; background: rgba(22, 163, 74, 0.1); padding: 4px 10px; border-radius: var(--r-pill); width: fit-content; }
+.pw-wrap { position: relative; display: flex; align-items: center; }
+.pw-wrap input { width: 100%; padding-right: 42px; }
+.pw-toggle { position: absolute; right: 10px; background: none; border: 0; cursor: pointer; color: var(--muted); padding: 4px; display: inline-flex; align-items: center; }
+.pw-toggle:hover { color: var(--fg); }
+.lockout-box { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); color: var(--red); padding: 12px 14px; border-radius: var(--r); font-size: 13px; font-weight: 600; text-align: center; line-height: 1.4; }
+.audit-notice { font-size: 11px; color: var(--muted); text-align: center; margin-top: 4px; line-height: 1.4; }
+.err-text { color: var(--red); font-weight: 600; font-size: 13px; background: rgba(239, 68, 68, 0.08); padding: 10px 12px; border-radius: var(--r); border: 1px solid rgba(239, 68, 68, 0.2); }
+.muted { color: var(--muted); }
+
+.menu-btn { display: none; background: none; border: 0; color: var(--chrome-fg); font-size: 22px; cursor: pointer; padding: 4px; }
+@media (max-width: 900px) {
+  .body { grid-template-columns: 1fr; }
+  .side { position: fixed; top: calc(64px + env(safe-area-inset-top, 0px)); left: 0; bottom: 0; height: auto; width: 260px; z-index: 25; transform: translateX(-100%); transition: transform .2s; padding-left: max(12px, env(safe-area-inset-left, 0px)); box-shadow: var(--shadow); }
+  .side.open { transform: none; }
+  .topbar { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); gap: 10px; }
+  .brand-sub, .top-right .who { display: none; }
+  .main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 60px; }
+  .menu-btn { display: inline-flex; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .auth { grid-template-columns: 1fr; }
+  .auth-art { padding: 28px 16px; }
+  .auth-art h2 { font-size: 34px; }
+  .kv { grid-template-columns: 110px 1fr; }
+  .page-head h1 { font-size: 26px; }
+}
+@media (prefers-reduced-motion: reduce) { .side { transition: none; } }
+</style>
+
+<div id="app"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/convex@1.17.0/dist/browser.bundle.js"></script>
+<script>
+/* Deployment fills these in automatically. Default set to charming-donkey-521. */
+window.TOWNAIJA_CONFIG = { url: "__CONVEX_URL__" };
+</script>
+<script>
+(function () {
+"use strict";
+
+/* ===================================================================
+   Labels & formatting
+   =================================================================== */
+const TRUCK = { wheel_lift: "Wheel-lift", flatbed: "Flatbed", heavy_duty: "Heavy-duty" };
+const VEHICLE = { car: "Car", suv: "SUV", van_bus: "Bus/Van", truck: "Truck" };
+const PROBLEM = { breakdown: "Breakdown", accident: "Accident", wont_start: "Won't start", flat_tyre: "Flat tyre", stuck: "Stuck / ditch", other: "Other" };
+const REQ = {
+  open: ["Finding operator", "blue"], matched: ["Operator en route", "amber"], arrived: ["Operator arrived", "amber"],
+  in_progress: ["Towing", "amber"], delivered: ["Awaiting confirmation", "amber"], completed: ["Completed", "green"],
+  cancelled: ["Cancelled", "red"], expired: ["Expired", ""]
+};
+const OPS = { pending: ["Pending review", "amber"], approved: ["Approved", "green"], rejected: ["Rejected", "red"], suspended: ["Suspended", "red"] };
+const EVENT = {
+  created: "Request created", offer_raised: "Customer raised offer", bid: "Operator sent offer", matched: "Customer chose operator",
+  arrived: "Operator arrived", wrong_start_code: "Wrong start code entered", started: "Tow started (code verified)",
+  delivered: "Vehicle delivered", completed: "Job completed", cancelled_by_customer: "Cancelled by customer",
+  cancelled_by_operator: "Operator cancelled — request reopened", cancelled_by_admin: "Cancelled by admin",
+  dispute_raised: "Problem reported", dispute_resolved: "Report resolved"
+};
+const LIVE = ["matched", "arrived", "in_progress", "delivered"];
+
+const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const naira = (n) => "₦" + Math.round(Number(n || 0)).toLocaleString("en-NG");
+const tz = { timeZone: "Africa/Lagos" };
+const fmtDate = (d) => d ? new Date(d).toLocaleString("en-NG", { ...tz, day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—";
+const fmtDay = (d) => new Date(d + "T12:00:00").toLocaleDateString("en-NG", { day: "numeric", month: "short" });
+const ago = (d) => {
+  if (!d) return "—";
+  const s = (Date.now() - new Date(d).getTime()) / 1000;
+  if (s < 60) return "just now";
+  if (s < 3600) return Math.floor(s / 60) + " min ago";
+  if (s < 86400) return Math.floor(s / 3600) + " h ago";
+  return Math.floor(s / 86400) + " d ago";
+};
+const chip = (map, key) => { const [t, c] = map[key] || [key, ""]; return `<span class="chip ${c}">${esc(t)}</span>`; };
+const normPhone = (p) => { let d = String(p || "").replace(/\D/g, ""); if (d.startsWith("234")) d = "0" + d.slice(3); if (d.length === 10) d = "0" + d; return d; };
+const phoneEmail = (p) => normPhone(p) + "@users.townaija.app";
+const mapsLink = (lat, lng) => `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+const dirLink = (a, b) => `https://www.google.com/maps/dir/?api=1&origin=${a[0]},${a[1]}&destination=${b[0]},${b[1]}`;
+
+/* ===================================================================
+   Operations Data Client
+   =================================================================== */
+function readConfig() {
+  const c = window.TOWNAIJA_CONFIG || {};
+  if (c.url && !String(c.url).startsWith("__")) return c;
+  return { url: "https://charming-donkey-521.convex.cloud" };
+}
+
+function liveApi(cfg) {
+  const client = new window.convex.ConvexClient(cfg.url);
+  const ok = (p) => p.catch((err) => { throw new Error(err.message || String(err)); });
+  return {
+    mode: "live",
+    async session() {
+      const token = localStorage.getItem("townaija_admin_token");
+      if (!token) return null;
+      client.setAuth(() => Promise.resolve(token));
+      const cur = await ok(client.query("users:current"));
+      if (!cur || !cur.user) {
+        localStorage.removeItem("townaija_admin_token");
+        client.clearAuth();
+        return null;
+      }
+      if (!cur.user.is_admin) {
+        localStorage.removeItem("townaija_admin_token");
+        client.clearAuth();
+        throw new Error("This account is not an admin.");
+      }
+      return cur.user;
+    },
+    async login(phone, password) {
+      const res = await ok(client.action("auth:signIn", {
+        provider: "password",
+        params: {
+          flow: "signIn",
+          email: phoneEmail(phone),
+          password: password,
+        },
+      }));
+      const token = res?.tokens?.token;
+      if (!token) throw new Error("Invalid login credentials.");
+      localStorage.setItem("townaija_admin_token", token);
+      client.setAuth(() => Promise.resolve(token));
+      const cur = await ok(client.query("users:current"));
+      if (!cur?.user?.is_admin) {
+        localStorage.removeItem("townaija_admin_token");
+        client.clearAuth();
+        throw new Error("This account is not an admin.");
+      }
+      return cur.user;
+    },
+    logout() {
+      localStorage.removeItem("townaija_admin_token");
+      client.clearAuth();
+      return client.action("auth:signOut", {}).catch(() => {});
+    },
+    stats: () => ok(client.query("admin:stats")),
+    operators: () => ok(client.query("admin:operators")),
+    operator: (id) => ok(client.query("admin:operator", { id })),
+    jobs: () => ok(client.query("admin:jobs")),
+    job: (id) => ok(client.query("tows:getRequestDetail", { p_request: id })),
+    customers: () => ok(client.query("admin:customers")),
+    topups: () => ok(client.query("admin:topups")),
+    ledger: () => ok(client.query("admin:ledger")),
+    disputes: () => ok(client.query("admin:disputes")),
+    settings: () => ok(client.query("admin:settings")),
+    admins: () => ok(client.query("admin:admins")),
+    findByPhone: async (phone) => {
+      const users = await ok(client.query("admin:customers"));
+      const p = normPhone(phone);
+      return users.find((u) => u.phone === p) || null;
+    },
+    fileUrl: (bucket, storageId) => {
+      if (!storageId) return null;
+      if (storageId.startsWith("http")) return storageId;
+      return ok(client.query("files:getFileUrl", { storage_id: storageId }));
+    },
+    reviewOperator: (id, decision, note) => ok(client.mutation("admin:reviewOperator", { p_operator: id, p_decision: decision, p_note: note || "" })),
+    adjustWallet: (id, amount, note) => ok(client.mutation("admin:adjustWallet", { p_operator: id, p_amount: amount, p_note: note })),
+    reviewTopup: (id, approve, note) => ok(client.mutation("admin:reviewTopup", { p_topup: id, p_approve: approve, p_note: note || "" })),
+    setUserStatus: (id, status) => ok(client.mutation("admin:setUserStatus", { p_user: id, p_status: status })),
+    cancelJob: (id, reason) => ok(client.mutation("admin:cancelJob", { p_request: id, p_reason: reason })),
+    completeJob: (id) => ok(client.mutation("admin:completeJob", { p_request: id })),
+    resolveDispute: (id, text, refund) => ok(client.mutation("admin:resolveDispute", { p_dispute: id, p_resolution: text, p_refund_commission: refund })),
+    saveSettings: (p) => ok(client.mutation("admin:saveSettings", { p })),
+    saveRate: (r) => ok(client.mutation("admin:saveRate", { truck_type: r.truck_type, base_fare: r.base_fare, per_km: r.per_km, min_fare: r.min_fare })),
+    saveCity: (c) => ok(client.mutation("admin:saveCity", { id: c.id || undefined, name: c.name, state: c.state, center_lat: c.center_lat, center_lng: c.center_lng, service_radius_km: c.service_radius_km, is_active: c.is_active })),
+    setAdmin: (id, role) => ok(client.mutation("admin:setAdmin", { p_user: id, p_role: role })),
+    onChange(cb) {
+      return client.onUpdate("admin:stats", {}, cb);
+    }
+  };
+}
+
+/* ===================================================================
+   App state & UI helpers
+   =================================================================== */
+const app = document.getElementById("app");
+const state = { api: null, me: null, cache: {}, filters: { ops: "pending", jobs: "live", disputes: "open", q: "" }, unsub: null };
+let drawerRefresh = null;
+
+function toast(msg, isErr) {
+  const t = document.createElement("div");
+  t.className = "toast" + (isErr ? " err" : "");
+  t.textContent = msg;
+  t.setAttribute("role", "status");
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), isErr ? 4500 : 2600);
+}
+async function run(fn, okMsg) {
+  try { await fn(); if (okMsg) toast(okMsg); return true; }
+  catch (e) { toast(e.message || String(e), true); return false; }
+}
+
+/* In-page confirm/prompt (browser dialogs are unavailable in some viewers) */
+function ask({ title, body = "", confirm = "Confirm", danger = false, input = null, checkbox = null }) {
+  return new Promise((resolve) => {
+    const wrap = document.createElement("div");
+    wrap.className = "modal";
+    wrap.innerHTML = `<div class="scrim" data-x></div><div class="card" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+      <h3>${esc(title)}</h3>${body ? `<p>${esc(body)}</p>` : ""}
+      ${input ? `<label class="field">${esc(input.label)}<${input.multiline ? "textarea rows='3'" : "input"} class="input" id="ask-input" type="${input.type || "text"}" placeholder="${esc(input.placeholder || "")}" value="${esc(input.value || "")}">${input.multiline ? "</textarea>" : ""}</label>` : ""}
+      ${checkbox ? `<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="ask-check"> ${esc(checkbox)}</label>` : ""}
+      <div class="actions" style="justify-content:flex-end"><button class="btn ghost" data-x>Back</button><button class="btn ${danger ? "danger" : "primary"}" data-ok>${esc(confirm)}</button></div></div>`;
+    document.body.appendChild(wrap);
+    const inp = wrap.querySelector("#ask-input");
+    (inp || wrap.querySelector("[data-ok]")).focus();
+    const done = (v) => { wrap.remove(); resolve(v); };
+    wrap.addEventListener("click", (e) => {
+      if (e.target.closest("[data-x]")) done(null);
+      if (e.target.closest("[data-ok]")) {
+        if (input && input.required && !inp.value.trim()) { inp.focus(); inp.style.borderColor = "var(--red)"; return; }
+        done({ value: inp ? inp.value.trim() : true, checked: !!wrap.querySelector("#ask-check")?.checked });
+      }
+    });
+    wrap.addEventListener("keydown", (e) => { if (e.key === "Escape") done(null); });
+  });
+}
+
+function openDrawer(html) {
+  closeDrawer();
+  const el = document.createElement("div");
+  el.id = "drawer";
+  el.innerHTML = `<div class="scrim" data-close></div><aside class="drawer" role="dialog" aria-modal="true">${html}</aside>`;
+  document.body.appendChild(el);
+  el.addEventListener("click", (e) => { if (e.target.closest("[data-close]")) closeDrawer(); });
+  el.querySelector(".x")?.focus();
+}
+function closeDrawer() { document.getElementById("drawer")?.remove(); drawerRefresh = null; }
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !document.querySelector(".modal")) closeDrawer(); });
+
+const icon = {
+  overview: '<path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>',
+  jobs: '<path d="M3 17h2l2-6h9l3 6h2M7 17a2 2 0 1 0 4 0 2 2 0 1 0-4 0M15 17a2 2 0 1 0 4 0 2 2 0 1 0-4 0M14 11V6h3"/>',
+  operators: '<path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0zM4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  customers: '<path d="M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 20c0-3 3-5 6-5s6 2 6 5M17 11a3 3 0 0 0 0-6M21 20c0-2-1-4-4-5"/>',
+  wallets: '<path d="M3 7h18v12H3zM3 7l3-3h12l3 3M16 13h2"/>',
+  disputes: '<path d="M12 3l9 16H3zM12 10v4M12 17v.5"/>',
+  settings: '<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12l2-1-1-3-2 .5-1.5-1.5.5-2-3-1-1 2h-2l-1-2-3 1 .5 2L5 8.5 3 8 2 11l2 1v0l-2 1 1 3 2-.5 1.5 1.5-.5 2 3 1 1-2h2l1 2 3-1-.5-2 1.5-1.5 2 .5 1-3z"/>'
+};
+const svgIcon = (k) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icon[k]}</svg>`;
+const ROUTES = [["overview", "Overview"], ["jobs", "Jobs"], ["operators", "Operators"], ["customers", "Customers"], ["wallets", "Wallets"], ["disputes", "Disputes"], ["settings", "Settings"]];
+const route = () => { const r = (location.hash || "").slice(1); return ROUTES.some(([k]) => k === r) ? r : "overview"; };
+
+function shell(content, counts = {}) {
+  const r = route();
+  app.innerHTML = `<div class="shell">
+    <header class="topbar">
+      <button class="menu-btn" id="menu-btn" aria-label="Open menu">☰</button>
+      <div class="brand"><div class="brand-mark"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16h3l2-5h7l3 5h5M6 16a2 2 0 1 0 4 0M15 16a2 2 0 1 0 4 0M14 11V6l5 4"/></svg></div>
+        <span class="brand-name">Townaija</span><span class="brand-sub">Operations</span></div>
+      <div class="top-right"><span class="who"><b>${esc(state.me?.full_name || "")}</b> · ${state.me?.admin_role === "super" ? "Super admin" : "Support"}</span>
+        <button id="logout">${state.api.mode === "demo" ? "Connect Supabase" : "Sign out"}</button></div>
+    </header>
+    <div class="body">
+      <nav class="side" id="rail" aria-label="Main"><div class="nav">${ROUTES.map(([k, t]) => `<a href="#${k}" class="${k === r ? "active" : ""}">${svgIcon(k)}${t}${counts[k] ? `<span class="count">${counts[k]}</span>` : ""}</a>`).join("")}</div></nav>
+      <main class="main" id="main">${state.api.mode === "demo" ? `<div class="demo-bar">Demo mode <span>Sample Abuja data. Actions work but nothing is saved. Deploy with your Supabase keys to run live operations.</span></div>` : ""}${content}</main>
+    </div>
+  </div>`;
+  document.getElementById("menu-btn").onclick = () => document.getElementById("rail").classList.toggle("open");
+  document.getElementById("logout").onclick = async () => {
+    if (state.api.mode === "demo") { renderConnect(); return; }
+    await state.api.logout(); state.me = null; renderLogin();
+  };
+}
+const head = (title, sub, right = "") => `<div class="page-head"><div><h1>${esc(title)}</h1>${sub ? `<p>${sub}</p>` : ""}</div><div class="actions">${right}</div></div>`;
+
+/* ===================================================================
+   Pages
+   =================================================================== */
+async function render() {
+  const r = route();
+  document.getElementById("rail")?.classList.remove("open");
+  let stats;
+  try { stats = await state.api.stats(); state.cache.stats = stats; }
+  catch (e) { shell(`<div class="panel"><b>Could not load data.</b><p class="muted">${esc(e.message)}</p></div>`); return; }
+  const counts = { operators: stats.operators_pending, wallets: stats.topups_pending, disputes: stats.disputes_open, jobs: stats.open_requests + stats.active_jobs };
+  const pages = { overview: pageOverview, jobs: pageJobs, operators: pageOperators, customers: pageCustomers, wallets: pageWallets, disputes: pageDisputes, settings: pageSettings };
+  try { shell(await pages[r](stats), counts); }
+  catch (e) { shell(`<div class="panel"><b>Something went wrong.</b><p class="muted">${esc(e.message)}</p></div>`, counts); return; }
+  bindPage(r);
+}
+
+function trendChart(days) {
+  const W = 640, H = 200, pad = { l: 34, r: 8, t: 10, b: 26 };
+  const max = Math.max(4, ...days.map((x) => x.requests));
+  const step = Math.ceil(max / 4);
+  const top = step * 4;
+  const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+  const bw = iw / days.length;
+  const y = (v) => pad.t + ih - (v / top) * ih;
+  let g = "";
+  for (let i = 0; i <= 4; i++) {
+    const v = step * i;
+    g += `<line x1="${pad.l}" x2="${W - pad.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${pad.l - 8}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}</text>`;
+  }
+  days.forEach((x, i) => {
+    const cx = pad.l + i * bw;
+    const w = Math.min(22, bw * 0.62);
+    const bx = cx + (bw - w) / 2;
+    g += `<rect x="${bx}" y="${y(x.requests)}" width="${w}" height="${Math.max(0, pad.t + ih - y(x.requests))}" rx="3" fill="var(--surface-2)"><title>${fmtDay(x.day)}: ${x.requests} requests</title></rect>`;
+    g += `<rect x="${bx}" y="${y(x.completed)}" width="${w}" height="${Math.max(0, pad.t + ih - y(x.completed))}" rx="3" fill="var(--green)"><title>${fmtDay(x.day)}: ${x.completed} completed · ${naira(x.gmv)}</title></rect>`;
+    if (i % 2 === 1 || days.length < 8) g += `<text x="${cx + bw / 2}" y="${H - 8}" text-anchor="middle" font-size="11" fill="var(--muted)">${fmtDay(x.day)}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Requests and completed tows, last 14 days">${g}</svg>
+    <div class="legend"><span><i style="background:var(--surface-2)"></i>Requests</span><span><i style="background:var(--green)"></i>Completed</span></div>`;
+}
+
+function jobsTable(list, empty) {
+  if (!list.length) return `<div class="table-wrap"><div class="empty">${empty}</div></div>`;
+  return `<div class="table-wrap"><table><thead><tr><th>Job</th><th>Customer</th><th>Operator</th><th>Vehicle</th><th>Route</th><th>Price</th><th>Status</th></tr></thead><tbody>
+  ${list.map((j) => `<tr class="click" data-job="${esc(j.id)}">
+    <td><b>${esc(j.ref)}</b><div class="sub">${ago(j.created_at)}</div></td>
+    <td>${esc(j.customer_name || "—")}<div class="sub num">${esc(j.customer_phone || "")}</div></td>
+    <td>${j.operator_name ? esc(j.operator_name) + `<div class="sub">${esc(j.truck_plate || "")}</div>` : '<span class="muted">—</span>'}</td>
+    <td>${esc(VEHICLE[j.vehicle_type])}<div class="sub">${esc(PROBLEM[j.problem_type])}</div></td>
+    <td style="max-width:240px">${esc(j.pickup_address)}<div class="sub">→ ${esc(j.dropoff_address)} · ${Number(j.distance_km).toFixed(1)} km</div></td>
+    <td class="num"><b>${naira(j.final_price || j.offer_amount)}</b>${j.final_price ? "" : '<div class="sub">offered</div>'}</td>
+    <td>${chip(REQ, j.status)}</td></tr>`).join("")}</tbody></table></div>`;
+}
+
+async function pageOverview(s) {
+  const jobs = await state.api.jobs();
+  state.cache.jobs = jobs;
+  const live = jobs.filter((j) => j.status === "open" || LIVE.includes(j.status));
+  const attn = [
+    [s.operators_pending, "Operators to verify", "Check licence, truck and ID", "#operators"],
+    [s.topups_pending, "Wallet top-ups to approve", "Match against bank alerts", "#wallets"],
+    [s.disputes_open, "Problems reported", "Review photos and decide", "#disputes"]
+  ];
+  return head("Overview", "Abuja operations at a glance. Updates live.") + `
+  <div class="kpis">
+    <div class="kpi live"><span class="label">Open requests</span><span class="value num">${s.open_requests}</span><span class="sub">Waiting for an operator</span></div>
+    <div class="kpi"><span class="label">Jobs in progress</span><span class="value num">${s.active_jobs}</span><span class="sub">En route, towing or delivering</span></div>
+    <div class="kpi"><span class="label">Operators online</span><span class="value num">${s.operators_online}<span class="muted" style="font-size:15px;font-weight:600"> / ${s.operators_approved}</span></span><span class="sub">Approved operators</span></div>
+    <div class="kpi"><span class="label">Completed today</span><span class="value num">${s.today_completed}</span><span class="sub">${naira(s.today_gmv)} towed</span></div>
+    <div class="kpi"><span class="label">Commission · 7 days</span><span class="value num">${naira(s.week_commission)}</span><span class="sub">${s.week_completed} jobs · ${naira(s.week_gmv)} value</span></div>
+    <div class="kpi"><span class="label">Match rate · 7 days</span><span class="value num">${s.match_rate_7d == null ? "—" : s.match_rate_7d + "%"}</span><span class="sub">Requests that found an operator</span></div>
+  </div>
+  <div class="grid-2">
+    <section class="panel chart"><h2>Last 14 days</h2>${trendChart(s.daily || [])}</section>
+    <section class="panel"><h2>Needs attention</h2><div class="attn">${attn.map(([n, t, sub, href]) => `<a href="${href}"><span class="n num" style="color:${n ? "var(--fg)" : "var(--muted)"}">${n}</span><span class="t"><b>${t}</b><span>${sub}</span></span><span aria-hidden="true">›</span></a>`).join("")}</div></section>
+  </div>
+  <section><h2 class="section-title">Live right now <small>${live.length} jobs</small></h2>
+  ${jobsTable(live, "No live requests. New requests appear here the moment a customer posts one.")}</section>`;
+}
+
+async function pageJobs() {
+  const jobs = state.cache.jobsFresh ? state.cache.jobs : await state.api.jobs();
+  state.cache.jobs = jobs; state.cache.jobsFresh = false;
+  const f = state.filters.jobs, q = state.filters.q.toLowerCase();
+  const groups = { live: (j) => j.status === "open" || LIVE.includes(j.status), completed: (j) => j.status === "completed", closed: (j) => ["cancelled", "expired"].includes(j.status), all: () => true };
+  const list = jobs.filter(groups[f]).filter((j) => !q || [j.ref, j.customer_name, j.customer_phone, j.operator_name, j.pickup_address, j.truck_plate].join(" ").toLowerCase().includes(q));
+  const n = (k) => jobs.filter(groups[k]).length;
+  return head("Jobs", "Every tow request, from first offer to payment.") + `
+  <div class="toolbar"><div class="tabs" role="tablist">${[["live", "Live"], ["completed", "Completed"], ["closed", "Cancelled & expired"], ["all", "All"]].map(([k, t]) => `<button data-filter="jobs:${k}" class="${f === k ? "on" : ""}">${t} <span class="num">${n(k)}</span></button>`).join("")}</div>
+  <input class="input" id="search" placeholder="Search ref, name, phone, plate" value="${esc(state.filters.q)}"></div>
+  ${jobsTable(list, "No jobs match this view.")}`;
+}
+
+async function pageOperators() {
+  const ops = await state.api.operators();
+  state.cache.ops = ops;
+  const f = state.filters.ops, q = state.filters.q.toLowerCase();
+  const list = ops.filter((o) => f === "all" || o.status === f).filter((o) => !q || [o.name, o.phone, o.truck_plate, o.base_area].join(" ").toLowerCase().includes(q));
+  const n = (k) => ops.filter((o) => k === "all" || o.status === k).length;
+  return head("Operators", "Verify tow operators before they can receive jobs.") + `
+  <div class="toolbar"><div class="tabs">${[["pending", "Pending"], ["approved", "Approved"], ["suspended", "Suspended"], ["rejected", "Rejected"], ["all", "All"]].map(([k, t]) => `<button data-filter="ops:${k}" class="${f === k ? "on" : ""}">${t} <span class="num">${n(k)}</span></button>`).join("")}</div>
+  <input class="input" id="search" placeholder="Search name, phone, plate, area" value="${esc(state.filters.q)}"></div>
+  ${list.length ? `<div class="table-wrap"><table><thead><tr><th></th><th>Operator</th><th>Truck</th><th>Base</th><th>Wallet</th><th>Jobs</th><th>Rating</th><th>Status</th></tr></thead><tbody>
+  ${list.map((o) => `<tr class="click" data-op="${esc(o.id)}">
+    <td style="width:24px"><span class="dot ${o.is_online ? "on" : ""}" title="${o.is_online ? "Online" : "Offline"}"></span></td>
+    <td><b>${esc(o.name)}</b><div class="sub num">${esc(o.phone)}</div></td>
+    <td>${esc(TRUCK[o.truck_type])}<div class="sub">${esc(o.truck_plate)} · ${esc(o.truck_make_model)}</div></td>
+    <td>${esc(o.base_area || "—")}</td>
+    <td class="num" style="color:${o.wallet_balance < (state.cache.settings?.min_wallet_balance ?? 1000) && o.status === "approved" ? "var(--red)" : "inherit"}">${naira(o.wallet_balance)}</td>
+    <td class="num">${o.jobs_completed}${o.cancellations ? `<div class="sub">${o.cancellations} cancelled</div>` : ""}</td>
+    <td class="num">${o.rating_count ? "★ " + Number(o.rating_avg).toFixed(1) + ` <span class="sub">(${o.rating_count})</span>` : '<span class="muted">New</span>'}</td>
+    <td>${chip(OPS, o.status)}${o.user_status === "blocked" ? ' <span class="chip red">Blocked</span>' : ""}<div class="sub">${o.status === "pending" ? "Applied " + ago(o.created_at) : ""}</div></td></tr>`).join("")}
+  </tbody></table></div>` : `<div class="table-wrap"><div class="empty">${f === "pending" ? "No applications waiting. New operator sign-ups land here." : "No operators in this view."}</div></div>`}`;
+}
+
+async function pageCustomers() {
+  const all = await state.api.customers();
+  const q = state.filters.q.toLowerCase();
+  const list = all.filter((p) => !q || [p.full_name, p.phone].join(" ").toLowerCase().includes(q));
+  return head("Customers", "Everyone with a Townaija account.") + `
+  <div class="toolbar"><input class="input" id="search" placeholder="Search name or phone" value="${esc(state.filters.q)}"></div>
+  <div class="table-wrap"><table><thead><tr><th>Name</th><th>Phone</th><th>Role</th><th>Rating</th><th>Joined</th><th>Status</th><th></th></tr></thead><tbody>
+  ${list.map((p) => `<tr><td><b>${esc(p.full_name || "—")}</b></td><td class="num">${esc(p.phone || "")}</td>
+    <td>${p.is_admin ? "Admin" : p.is_operator ? "Operator" : "Customer"}</td>
+    <td class="num">${p.rating_count ? "★ " + Number(p.rating_avg).toFixed(1) : '<span class="muted">—</span>'}</td>
+    <td>${fmtDate(p.created_at)}</td>
+    <td>${p.status === "blocked" ? '<span class="chip red">Blocked</span>' : '<span class="chip green">Active</span>'}</td>
+    <td style="text-align:right">${p.id === state.me.id ? "" : `<button class="btn sm ${p.status === "blocked" ? "ghost" : "danger"}" data-block="${esc(p.id)}" data-to="${p.status === "blocked" ? "active" : "blocked"}">${p.status === "blocked" ? "Unblock" : "Block"}</button>`}</td></tr>`).join("") || `<tr><td colspan="7" class="empty">No accounts match.</td></tr>`}
+  </tbody></table></div>`;
+}
+
+async function pageWallets() {
+  const [topups, ledger] = await Promise.all([state.api.topups(), state.api.ledger()]);
+  const pending = topups.filter((t) => t.status === "pending");
+  const s = state.cache.settings;
+  return head("Wallets", "Operators prepay commission. Approve top-ups after you see the money in the bank.") + `
+  <section class="panel" style="margin-bottom:36px"><h2>Top-ups waiting <small>${pending.length}</small></h2>
+  ${pending.length ? `<div class="table-wrap"><table><thead><tr><th>Operator</th><th>Amount</th><th>Bank reference</th><th>Sent</th><th>Receipt</th><th></th></tr></thead><tbody>
+  ${pending.map((t) => `<tr><td><b>${esc(t.operator_name)}</b><div class="sub num">${esc(t.operator_phone)} · ${esc(t.truck_plate)}</div></td>
+    <td class="num"><b>${naira(t.amount)}</b></td><td>${esc(t.reference || "—")}</td><td>${ago(t.created_at)}</td>
+    <td>${t.proof_path ? `<button class="btn sm ghost" data-proof="${esc(t.proof_path)}">View receipt</button>` : '<span class="muted">None</span>'}</td>
+    <td style="text-align:right;white-space:nowrap"><button class="btn sm primary" data-topup="${esc(t.id)}" data-approve="1">Approve</button> <button class="btn sm danger" data-topup="${esc(t.id)}" data-approve="0">Reject</button></td></tr>`).join("")}
+  </tbody></table></div>` : `<p class="muted" style="margin:0">Nothing to approve. Operators send top-up requests from the app after paying into ${esc(s?.bank_name || "your bank account")}.</p>`}
+  </section>
+  <section><h2 class="section-title">Recent wallet activity</h2>
+  <div class="table-wrap"><table><thead><tr><th>When</th><th>Operator</th><th>Type</th><th>Note</th><th style="text-align:right">Amount</th><th style="text-align:right">Balance after</th></tr></thead><tbody>
+  ${ledger.map((t) => `<tr><td>${fmtDate(t.created_at)}</td><td>${esc(t.operator_name || "")}</td><td>${esc({ topup: "Top-up", commission: "Commission", adjustment: "Adjustment", refund: "Refund" }[t.kind])}</td><td>${esc(t.note)}</td>
+    <td class="num" style="text-align:right;color:${t.amount < 0 ? "var(--red)" : "var(--green)"};font-weight:700">${t.amount < 0 ? "−" : "+"}${naira(Math.abs(t.amount))}</td><td class="num" style="text-align:right">${naira(t.balance_after)}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">No wallet activity yet.</td></tr>`}
+  </tbody></table></div></section>`;
+}
+
+async function pageDisputes() {
+  const all = await state.api.disputes();
+  state.cache.disputes = all;
+  const f = state.filters.disputes;
+  const list = all.filter((d) => f === "all" || d.status === f);
+  return head("Disputes", "Problems reported by customers or operators. Compare the pickup and delivery photos before deciding.") + `
+  <div class="toolbar"><div class="tabs">${[["open", "Open"], ["resolved", "Resolved"], ["all", "All"]].map(([k, t]) => `<button data-filter="disputes:${k}" class="${f === k ? "on" : ""}">${t} <span class="num">${all.filter((d) => k === "all" || d.status === k).length}</span></button>`).join("")}</div></div>
+  <div class="table-wrap"><table><thead><tr><th>Job</th><th>Raised by</th><th>Reason</th><th>When</th><th>Status</th><th></th></tr></thead><tbody>
+  ${list.map((d) => `<tr><td><b>${esc(d.ref)}</b><div class="sub num">${naira(d.final_price)}</div></td>
+    <td>${esc(d.raiser_name)}<div class="sub">${d.raised_by_role === "customer" ? "Customer" : "Operator"} · <span class="num">${esc(d.raiser_phone)}</span></div></td>
+    <td style="max-width:320px"><b>${esc(d.reason)}</b><div class="sub">${esc(d.details)}</div>${d.resolution ? `<div class="sub" style="color:var(--green)">Resolved: ${esc(d.resolution)}</div>` : ""}</td>
+    <td>${ago(d.created_at)}</td><td>${d.status === "open" ? '<span class="chip amber">Open</span>' : '<span class="chip green">Resolved</span>'}</td>
+    <td style="text-align:right;white-space:nowrap"><button class="btn sm ghost" data-job="${esc(d.request_id)}">Open job</button>${d.status === "open" ? ` <button class="btn sm primary" data-resolve="${esc(d.id)}">Resolve</button>` : ""}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">${f === "open" ? "No open reports." : "Nothing here yet."}</td></tr>`}
+  </tbody></table></div>`;
+}
+
+async function pageSettings() {
+  const { settings: s, rates, cities } = await state.api.settings();
+  state.cache.settings = s;
+  const admins = await state.api.admins();
+  const num = (k, label, hint, step = "1") => `<label class="field">${label}<input class="input num" type="number" step="${step}" id="set-${k}" value="${esc(s[k])}"><small>${hint}</small></label>`;
+  const txt = (k, label, hint) => `<label class="field">${label}<input class="input" id="set-${k}" value="${esc(s[k] || "")}"><small>${hint}</small></label>`;
+  return head("Settings", "Pricing, matching rules and payment details. Changes apply to new requests immediately.") + `<div class="stack">
+  <section class="panel"><h2>Money</h2><div class="form-grid">
+    ${num("commission_pct", "Commission (%)", "Taken from each completed job", "0.5")}
+    ${num("min_wallet_balance", "Minimum wallet (₦)", "Operators below this cannot receive jobs")}
+    ${num("offer_floor_pct", "Lowest offer allowed (%)", "Of the recommended fare")}
+  </div></section>
+  <section class="panel"><h2>Matching</h2><div class="form-grid">
+    ${num("search_radius_km", "Search radius (km)", "Who sees a new request first", "0.5")}
+    ${num("max_search_radius_km", "Widened radius (km)", "Used after the wait below", "0.5")}
+    ${num("radius_expand_after_min", "Widen after (min)", "If no one picks it up")}
+    ${num("request_expiry_min", "Request expires after (min)", "With no operator chosen")}
+    ${num("bid_expiry_min", "Operator offer valid for (min)", "Before it disappears")}
+    ${num("auto_confirm_hours", "Auto-confirm delivery after (h)", "If the customer forgets", "0.5")}
+    ${num("road_factor", "Road distance factor", "Straight line × this = road km", "0.05")}
+  </div></section>
+  <section class="panel"><h2>Bank details for top-ups</h2><div class="form-grid">
+    ${txt("bank_name", "Bank", "Shown to operators in the app")}${txt("bank_account_name", "Account name", "")}${txt("bank_account_number", "Account number", "")}${txt("support_phone", "Support phone", "Shown in the app")}
+  </div><div class="actions" style="margin-top:16px"><button class="btn primary" id="save-settings">Save settings</button></div></section>
+
+  <section class="panel"><h2>Fare guide <small>₦ · what customers see as the recommended price</small></h2>
+  <div class="table-wrap"><table style="min-width:560px"><thead><tr><th>Truck type</th><th>Base fare</th><th>Per km</th><th>Minimum</th><th></th></tr></thead><tbody>
+  ${rates.map((r) => `<tr><td><b>${esc(TRUCK[r.truck_type])}</b></td>
+    <td><input class="input num" type="number" id="rate-${r.truck_type}-base_fare" value="${r.base_fare}"></td>
+    <td><input class="input num" type="number" id="rate-${r.truck_type}-per_km" value="${r.per_km}"></td>
+    <td><input class="input num" type="number" id="rate-${r.truck_type}-min_fare" value="${r.min_fare}"></td>
+    <td><button class="btn sm primary" data-rate="${r.truck_type}">Save</button></td></tr>`).join("")}
+  </tbody></table></div>
+  <p class="muted" style="margin:10px 0 0">Example: a 10 km flatbed tow is recommended at ${naira(Math.max(+rates.find((r) => r.truck_type === "flatbed")?.min_fare || 0, (+rates.find((r) => r.truck_type === "flatbed")?.base_fare || 0) + (+rates.find((r) => r.truck_type === "flatbed")?.per_km || 0) * 10))}. Customers can offer from ${s.offer_floor_pct}% of that; operators can accept or counter higher.</p></section>
+
+  <section class="panel"><h2>Cities</h2>
+  <div class="table-wrap"><table style="min-width:640px"><thead><tr><th>City</th><th>State</th><th>Centre (lat, lng)</th><th>Radius km</th><th>Live</th><th></th></tr></thead><tbody>
+  ${cities.map((c) => `<tr><td><input class="input" id="city-${c.id}-name" value="${esc(c.name)}"></td><td><input class="input" id="city-${c.id}-state" value="${esc(c.state)}"></td>
+    <td style="white-space:nowrap"><input class="input num" style="width:96px" id="city-${c.id}-lat" value="${c.center_lat}"> <input class="input num" style="width:96px" id="city-${c.id}-lng" value="${c.center_lng}"></td>
+    <td><input class="input num" style="width:80px" id="city-${c.id}-radius" value="${c.service_radius_km}"></td>
+    <td><input type="checkbox" id="city-${c.id}-active" ${c.is_active ? "checked" : ""} aria-label="Live in ${esc(c.name)}"></td>
+    <td><button class="btn sm primary" data-city="${c.id}">Save</button></td></tr>`).join("")}
+    <tr><td><input class="input" id="city-new-name" placeholder="New city"></td><td><input class="input" id="city-new-state" placeholder="State"></td>
+    <td style="white-space:nowrap"><input class="input num" style="width:96px" id="city-new-lat" placeholder="6.4550"> <input class="input num" style="width:96px" id="city-new-lng" placeholder="3.3841"></td>
+    <td><input class="input num" style="width:80px" id="city-new-radius" value="60"></td><td><input type="checkbox" id="city-new-active" aria-label="Live"></td>
+    <td><button class="btn sm" data-city="new">Add</button></td></tr>
+  </tbody></table></div></section>
+
+  <section class="panel"><h2>Admin team</h2>
+  <div class="table-wrap"><table style="min-width:480px"><thead><tr><th>Name</th><th>Phone</th><th>Role</th><th></th></tr></thead><tbody>
+  ${admins.map((a) => `<tr><td><b>${esc(a.full_name)}</b></td><td class="num">${esc(a.phone)}</td><td>${a.admin_role === "super" ? "Super admin" : "Support"}</td>
+    <td style="text-align:right">${a.id !== state.me.id && state.me.admin_role === "super" ? `<button class="btn sm danger" data-admin="${esc(a.id)}" data-role="">Remove</button>` : ""}</td></tr>`).join("")}
+  </tbody></table></div>
+  ${state.me.admin_role === "super" ? `<div class="toolbar" style="margin:14px 0 0"><input class="input" id="new-admin-phone" placeholder="Phone of an existing account">
+    <select class="input" id="new-admin-role" style="max-width:160px"><option value="support">Support</option><option value="super">Super admin</option></select>
+    <button class="btn primary" id="add-admin">Add admin</button></div><p class="muted" style="margin:8px 0 0">The person signs up in the Townaija app first, then you add them here.</p>` : ""}
+  </section></div>`;
+}
+
+/* ===================================================================
+   Drawers
+   =================================================================== */
+async function photoGrid(bucket, paths, label) {
+  if (!paths || !paths.length) return `<p class="muted" style="margin:0">No ${label.toLowerCase()} yet.</p>`;
+  const urls = await Promise.all(paths.map((p) => state.api.fileUrl(bucket, p).catch(() => null)));
+  return `<div class="photos">${urls.map((u, i) => `<figure>${u ? `<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="${esc(label)} ${i + 1}" loading="lazy"></a>` : `<div class="ph">${state.api.mode === "demo" ? "Photo (demo)" : "Unavailable"}</div>`}<figcaption>${esc(label)} ${paths.length > 1 ? i + 1 : ""}</figcaption></figure>`).join("")}</div>`;
+}
+
+async function openJob(id) {
+  drawerRefresh = () => openJob(id);
+  const j = await state.api.job(id);
+  const op = j.operator;
+  const isLive = LIVE.includes(j.status) || j.status === "open";
+  const evs = (j.events || []).slice().reverse();
+  openDrawer(`<div class="drawer-head"><div><h3>${esc(j.ref)} ${chip(REQ, j.status)}</h3><p>${esc(VEHICLE[j.vehicle_type])} · ${esc(j.vehicle_desc || "")} · ${esc(PROBLEM[j.problem_type])}</p></div><button class="x" data-close aria-label="Close">×</button></div>
+  <div class="drawer-body">
+    <div class="section"><h4>Route · ${Number(j.distance_km).toFixed(1)} km</h4>
+      <div class="route"><span class="pin a"></span><div><b>${esc(j.pickup_address || "Pickup")}</b> · <a href="${mapsLink(j.pickup_lat, j.pickup_lng)}" target="_blank" rel="noopener">Map</a></div><span class="stem"></span><span></span><span class="pin"></span><div><b>${esc(j.dropoff_address || "Drop-off")}</b> · <a href="${mapsLink(j.dropoff_lat, j.dropoff_lng)}" target="_blank" rel="noopener">Map</a></div></div>
+      <p style="margin:8px 0 0"><a href="${dirLink([j.pickup_lat, j.pickup_lng], [j.dropoff_lat, j.dropoff_lng])}" target="_blank" rel="noopener">Open directions in Google Maps</a></p></div>
+    <div class="section"><h4>Money</h4><dl class="kv">
+      <dt>Customer offered</dt><dd class="num">${naira(j.offer_amount)} <span class="muted">(guide ${naira(j.recommended_fare)})</span></dd>
+      <dt>Agreed price</dt><dd class="num">${j.final_price ? naira(j.final_price) : "—"}</dd>
+      <dt>Commission</dt><dd class="num">${j.commission_amount ? naira(j.commission_amount) : "—"}</dd>
+      <dt>Payment</dt><dd>${j.payment_method === "transfer" ? "Bank transfer to operator" : "Cash to operator"}</dd></dl></div>
+    <div class="section"><h4>People</h4><dl class="kv">
+      <dt>Customer</dt><dd>${esc(j.customer?.name || j.customer_name || "")}<br><span class="num muted">${esc(j.customer?.phone || "")}</span></dd>
+      <dt>Operator</dt><dd>${op ? `${esc(op.name)}<br><span class="num muted">${esc(op.phone || "")}</span><br><span class="muted">${esc(TRUCK[op.truck_type] || "")} · ${esc(op.truck_plate)}</span>` : '<span class="muted">Not assigned</span>'}</dd>
+      <dt>Start code</dt><dd class="num"><b>${esc(j.start_code || "—")}</b> <span class="muted">customer-only</span></dd>
+      <dt>Vehicle state</dt><dd>${j.wheels_roll ? "Wheels roll" : "Wheels locked"} · ${j.keys_available ? "Keys available" : "No keys"}</dd>
+      ${j.notes ? `<dt>Customer note</dt><dd>${esc(j.notes)}</dd>` : ""}
+      ${j.cancel_reason ? `<dt>Cancel reason</dt><dd>${esc(j.cancel_reason)} <span class="muted">(${esc(j.cancelled_by)})</span></dd>` : ""}</dl></div>
+    <div class="section"><h4>Customer's photos</h4>${await photoGrid("job-photos", j.photo_paths, "Customer photo")}</div>
+    <div class="section"><h4>Condition at pickup</h4>${await photoGrid("job-photos", j.pickup_photo_paths, "Pickup photo")}</div>
+    <div class="section"><h4>Condition at drop-off</h4>${await photoGrid("job-photos", j.delivery_photo_paths, "Drop-off photo")}</div>
+    ${(j.bids || []).length ? `<div class="section"><h4>Offers</h4><div class="table-wrap"><table style="min-width:0"><tbody>${j.bids.map((b) => `<tr><td>${esc(b.operator_name)}</td><td class="num"><b>${naira(b.amount)}</b></td><td>${esc(b.status)}</td><td class="sub">${ago(b.created_at)}</td></tr>`).join("")}</tbody></table></div></div>` : ""}
+    <div class="section"><h4>Timeline</h4><ul class="timeline">${evs.map((e) => `<li><span></span><div><b>${esc(EVENT[e.event] || e.event)}</b>${e.detail?.amount ? ` <span class="num muted">${naira(e.detail.amount)}</span>` : ""}${e.detail?.reason ? `<div class="muted">${esc(e.detail.reason)}</div>` : ""}</div><span class="when">${fmtDate(e.created_at)}</span></li>`).join("")}</ul></div>
+    <div class="section"><h4>Actions</h4><div class="actions">
+      ${j.status === "delivered" ? `<button class="btn primary" data-act="complete">Mark completed & charge commission</button>` : ""}
+      ${isLive ? `<button class="btn danger" data-act="cancel">Cancel job</button>` : ""}
+      ${!isLive && j.status !== "delivered" ? '<span class="muted">This job is closed.</span>' : ""}
+    </div></div>
+  </div>`);
+  const d = document.getElementById("drawer");
+  d.querySelector('[data-act="complete"]')?.addEventListener("click", async () => {
+    if (!(await ask({ title: "Complete " + j.ref + "?", body: `This charges the operator's wallet ${state.cache.settings?.commission_pct ?? 10}% commission on ${naira(j.final_price)}.`, confirm: "Complete job" }))) return;
+    if (await run(() => state.api.completeJob(j.id), "Job completed")) { openJob(id); render(); }
+  });
+  d.querySelector('[data-act="cancel"]')?.addEventListener("click", async () => {
+    const a = await ask({ title: "Cancel " + j.ref + "?", body: "The customer and operator are notified with your reason.", confirm: "Cancel job", danger: true, input: { label: "Reason", required: true, placeholder: "e.g. Duplicate request" } });
+    if (!a) return;
+    if (await run(() => state.api.cancelJob(j.id, a.value), "Job cancelled")) { openJob(id); render(); }
+  });
+}
+
+async function openOperator(id) {
+  drawerRefresh = () => openOperator(id);
+  const o = await state.api.operator(id);
+  const docs = [["Driver's licence", o.license_doc_path], ["ID card", o.id_doc_path], ["Truck", o.truck_photo_path], ["Selfie", o.selfie_path]];
+  const urls = await Promise.all(docs.map(([, p]) => (p ? state.api.fileUrl("operator-docs", p).catch(() => null) : null)));
+  openDrawer(`<div class="drawer-head"><div><h3>${esc(o.name)} ${chip(OPS, o.status)}</h3><p class="num">${esc(o.phone)} · applied ${fmtDate(o.created_at)}</p></div><button class="x" data-close aria-label="Close">×</button></div>
+  <div class="drawer-body">
+    <div class="section"><h4>Documents</h4><div class="photos">${docs.map(([label, p], i) => `<figure>${urls[i] ? `<a href="${esc(urls[i])}" target="_blank" rel="noopener"><img src="${esc(urls[i])}" alt="${esc(label)}"></a>` : `<div class="ph">${p ? (state.api.mode === "demo" ? "Uploaded (demo)" : "Unavailable") : "Not provided"}</div>`}<figcaption>${esc(label)}</figcaption></figure>`).join("")}</div></div>
+    <div class="section"><h4>Truck</h4><dl class="kv">
+      <dt>Type</dt><dd>${esc(TRUCK[o.truck_type])}</dd><dt>Plate</dt><dd class="num"><b>${esc(o.truck_plate)}</b></dd>
+      <dt>Make / model</dt><dd>${esc(o.truck_make_model || "—")}</dd><dt>Base area</dt><dd>${esc(o.base_area || "—")}</dd>
+      <dt>Last online</dt><dd>${o.is_online ? '<span class="chip green">Online now</span>' : ago(o.last_seen_at)}</dd>
+      ${o.review_note ? `<dt>Review note</dt><dd>${esc(o.review_note)}</dd>` : ""}</dl></div>
+    <div class="section"><h4>Verification</h4><div class="actions">
+      ${o.status === "pending" || o.status === "rejected" ? `<button class="btn primary" data-dec="approve">Approve operator</button><button class="btn danger" data-dec="reject">Reject</button>` : ""}
+      ${o.status === "approved" ? `<button class="btn danger" data-dec="suspend">Suspend</button>` : ""}
+      ${o.status === "suspended" ? `<button class="btn primary" data-dec="reinstate">Reinstate</button>` : ""}
+      <button class="btn ghost" data-block="${o.user_status === "blocked" ? "active" : "blocked"}">${o.user_status === "blocked" ? "Unblock account" : "Block account"}</button>
+    </div></div>
+    <div class="section"><h4>Performance</h4><dl class="kv"><dt>Jobs completed</dt><dd class="num">${o.jobs_completed}</dd><dt>Cancellations</dt><dd class="num">${o.cancellations || 0}</dd><dt>Rating</dt><dd class="num">${o.rating_count ? "★ " + Number(o.rating_avg).toFixed(1) + " from " + o.rating_count : "No ratings yet"}</dd></dl></div>
+    <div class="section"><h4>Wallet · <span class="num" style="color:var(--fg)">${naira(o.wallet_balance)}</span></h4>
+      <div class="actions"><button class="btn ghost" data-adjust="1">Credit</button><button class="btn ghost" data-adjust="-1">Debit</button></div>
+      ${(o.ledger || []).length ? `<div class="table-wrap" style="margin-top:12px"><table style="min-width:0"><tbody>${o.ledger.map((t) => `<tr><td class="sub">${fmtDate(t.created_at)}</td><td>${esc(t.note)}</td><td class="num" style="text-align:right;color:${t.amount < 0 ? "var(--red)" : "var(--green)"}">${t.amount < 0 ? "−" : "+"}${naira(Math.abs(t.amount))}</td></tr>`).join("")}</tbody></table></div>` : ""}
+    </div>
+    ${(o.recent_jobs || []).length ? `<div class="section"><h4>Recent jobs</h4><div class="table-wrap"><table style="min-width:0"><tbody>${o.recent_jobs.map((j) => `<tr class="click" data-job="${esc(j.id)}"><td><b>${esc(j.ref)}</b></td><td>${chip(REQ, j.status)}</td><td class="num">${j.final_price ? naira(j.final_price) : "—"}</td><td class="sub">${ago(j.created_at)}</td></tr>`).join("")}</tbody></table></div></div>` : ""}
+  </div>`);
+  const d = document.getElementById("drawer");
+  d.querySelectorAll("[data-dec]").forEach((b) => b.addEventListener("click", async () => {
+    const dec = b.dataset.dec;
+    const copy = { approve: ["Approve " + o.name + "?", "They can go online and receive jobs once their wallet has at least the minimum balance.", "Approve"], reject: ["Reject application?", "Tell them what to fix. They can re-apply from the app.", "Reject"], suspend: ["Suspend " + o.name + "?", "They go offline immediately and their open offers are withdrawn.", "Suspend"], reinstate: ["Reinstate " + o.name + "?", "", "Reinstate"] }[dec];
+    const a = await ask({ title: copy[0], body: copy[1], confirm: copy[2], danger: dec === "reject" || dec === "suspend", input: dec === "approve" || dec === "reinstate" ? null : { label: "Reason (sent to operator)", required: true, multiline: true } });
+    if (!a) return;
+    if (await run(() => state.api.reviewOperator(o.id, dec, a.value === true ? "" : a.value), "Saved")) { openOperator(id); render(); }
+  }));
+  d.querySelector("[data-block]").addEventListener("click", async (e) => {
+    const to = e.currentTarget.dataset.block;
+    if (!(await ask({ title: to === "blocked" ? "Block this account?" : "Unblock this account?", body: to === "blocked" ? "They can't request tows or receive jobs until unblocked." : "", confirm: to === "blocked" ? "Block" : "Unblock", danger: to === "blocked" }))) return;
+    if (await run(() => state.api.setUserStatus(o.id, to), "Saved")) { openOperator(id); render(); }
+  });
+  d.querySelectorAll("[data-adjust]").forEach((b) => b.addEventListener("click", async () => {
+    const sign = +b.dataset.adjust;
+    const amt = await ask({ title: sign > 0 ? "Credit wallet" : "Debit wallet", confirm: sign > 0 ? "Credit" : "Debit", input: { label: "Amount (₦)", type: "number", required: true } });
+    if (!amt) return;
+    const note = await ask({ title: "Why?", body: "Kept in the wallet history.", confirm: "Save", input: { label: "Note", required: true, placeholder: "e.g. Promo credit for first 10 operators" } });
+    if (!note) return;
+    if (await run(() => state.api.adjustWallet(o.id, sign * Math.abs(+amt.value), note.value), "Wallet updated")) openOperator(id);
+  }));
+}
+
+/* ===================================================================
+   Event binding
+   =================================================================== */
+function bindPage(r) {
+  const main = document.getElementById("main");
+  const s = main.querySelector("#search");
+  if (s) {
+    s.addEventListener("input", () => { state.filters.q = s.value; clearTimeout(s._t); s._t = setTimeout(() => { if (r === "jobs") state.cache.jobsFresh = true; render().then(() => { const n = document.getElementById("search"); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }); }, 250); });
+  }
+  main.addEventListener("click", async (e) => {
+    const t = e.target.closest("button, tr");
+    if (!t) return;
+    if (t.dataset.filter) { const [k, v] = t.dataset.filter.split(":"); state.filters[k] = v; if (k === "jobs") state.cache.jobsFresh = true; render(); return; }
+    if (t.dataset.job && t.tagName !== "BUTTON" || t.tagName === "BUTTON" && t.dataset.job) { openJob(t.dataset.job); return; }
+    if (t.dataset.op) { openOperator(t.dataset.op); return; }
+    if (t.dataset.block) {
+      const to = t.dataset.to;
+      if (!(await ask({ title: to === "blocked" ? "Block this account?" : "Unblock this account?", confirm: to === "blocked" ? "Block" : "Unblock", danger: to === "blocked" }))) return;
+      if (await run(() => state.api.setUserStatus(t.dataset.block, to), "Saved")) render();
+      return;
+    }
+    if (t.dataset.topup) {
+      const approve = t.dataset.approve === "1";
+      const a = await ask({ title: approve ? "Approve top-up?" : "Reject top-up?", body: approve ? "Only approve after you have seen this amount arrive in the company account." : "Tell the operator why.", confirm: approve ? "Approve & credit wallet" : "Reject", danger: !approve, input: approve ? null : { label: "Reason", required: true } });
+      if (!a) return;
+      if (await run(() => state.api.reviewTopup(t.dataset.topup, approve, a.value === true ? "" : a.value), approve ? "Wallet credited" : "Top-up rejected")) render();
+      return;
+    }
+    if (t.dataset.proof) {
+      const url = await state.api.fileUrl("topup-proofs", t.dataset.proof);
+      if (url) openDrawer(`<div class="drawer-head"><div><h3>Transfer receipt</h3></div><button class="x" data-close aria-label="Close">×</button></div><div class="drawer-body"><a href="${esc(url)}" target="_blank" rel="noopener"><img src="${esc(url)}" alt="Transfer receipt" style="width:100%;border-radius:8px"></a></div>`);
+      else toast(state.api.mode === "demo" ? "Receipts show here in live mode." : "Could not load the receipt.", state.api.mode !== "demo");
+      return;
+    }
+    if (t.dataset.resolve) {
+      const d = state.cache.disputes.find((x) => x.id === t.dataset.resolve);
+      const a = await ask({ title: "Resolve report on " + d.ref, body: "Your note is sent to the person who reported it.", confirm: "Resolve", input: { label: "Resolution", required: true, multiline: true }, checkbox: d.commission_amount ? `Refund the ${naira(d.commission_amount)} commission to the operator` : null });
+      if (!a) return;
+      if (await run(() => state.api.resolveDispute(d.id, a.value, a.checked), "Report resolved")) render();
+      return;
+    }
+    if (t.id === "save-settings") {
+      const keys = ["commission_pct", "min_wallet_balance", "offer_floor_pct", "search_radius_km", "max_search_radius_km", "radius_expand_after_min", "request_expiry_min", "bid_expiry_min", "auto_confirm_hours", "road_factor"];
+      const p = {};
+      keys.forEach((k) => { p[k] = Number(main.querySelector("#set-" + k).value); });
+      ["bank_name", "bank_account_name", "bank_account_number", "support_phone"].forEach((k) => { p[k] = main.querySelector("#set-" + k).value.trim(); });
+      if (await run(() => state.api.saveSettings(p), "Settings saved")) render();
+      return;
+    }
+    if (t.dataset.rate) {
+      const k = t.dataset.rate, v = (f) => Number(main.querySelector(`#rate-${k}-${f}`).value);
+      await run(() => state.api.saveRate({ truck_type: k, base_fare: v("base_fare"), per_km: v("per_km"), min_fare: v("min_fare") }), TRUCK[k] + " rates saved");
+      return;
+    }
+    if (t.dataset.city) {
+      const k = t.dataset.city, g = (f) => main.querySelector(`#city-${k}-${f}`);
+      const c = { id: k === "new" ? null : +k, name: g("name").value.trim(), state: g("state").value.trim(), center_lat: +g("lat").value, center_lng: +g("lng").value, service_radius_km: +g("radius").value, is_active: g("active").checked };
+      if (!c.name || !c.center_lat || !c.center_lng) { toast("Enter a city name and its centre coordinates.", true); return; }
+      if (await run(() => state.api.saveCity(c), "City saved")) render();
+      return;
+    }
+    if (t.id === "add-admin") {
+      const p = await state.api.findByPhone(main.querySelector("#new-admin-phone").value);
+      if (!p) { toast("No account with that phone. Ask them to sign up in the app first.", true); return; }
+      if (await run(() => state.api.setAdmin(p.id, main.querySelector("#new-admin-role").value), p.full_name + " is now an admin")) render();
+      return;
+    }
+    if (t.dataset.admin !== undefined && t.dataset.role !== undefined && t.tagName === "BUTTON") {
+      if (!(await ask({ title: "Remove admin access?", confirm: "Remove", danger: true }))) return;
+      if (await run(() => state.api.setAdmin(t.dataset.admin, null), "Admin removed")) render();
+    }
+  });
+}
+document.addEventListener("click", (e) => {
+  const tr = e.target.closest("#drawer tr[data-job]");
+  if (tr) openJob(tr.dataset.job);
+});
+
+/* ===================================================================
+   Login / connect
+   =================================================================== */
+let failCount = 0;
+let lockoutTimer = null;
+
+function authLayout(inner) {
+  app.innerHTML = `<div class="auth">
+    <div class="auth-art">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 16h3l2-5h7l3 5h5M6 16a2 2 0 1 0 4 0M15 16a2 2 0 1 0 4 0M14 11V6l5 4"/>
+          </svg>
+        </div>
+        <div class="brand-name">Townaija</div>
+      </div>
+      <div>
+        <h2>National Tow Dispatch & Fleet Operations.</h2>
+        <p>Real-time incident response, operator fleet monitoring, automated dispatch, and financial settlement.</p>
+      </div>
+      <p style="margin:0;font-size:12px;opacity:0.7">Townaija Enterprise Operations Platform</p>
+    </div>
+    <div class="auth-form">
+      <div class="auth-card">
+        ${inner}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderLogin(msg) {
+  const lockoutUntil = Number(sessionStorage.getItem("tn_lockout") || "0");
+  const isLocked = lockoutUntil > Date.now();
+
+  const secBadge = `<div class="sec-badge">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    Encrypted Administrative Portal
+  </div>`;
+
+  if (isLocked) {
+    const remSec = Math.ceil((lockoutUntil - Date.now()) / 1000);
+    authLayout(`
+      ${secBadge}
+      <h1>Operations Command</h1>
+      <div class="lockout-box" id="lockout-msg">
+        Too many failed authentication attempts.<br>
+        Access temporarily restricted for security.<br>
+        Please wait <span id="countdown">${remSec}</span>s before retrying.
+      </div>
+      <p class="audit-notice">Repeated unauthorized access attempts are monitored and flagged.</p>
+    `);
+    clearInterval(lockoutTimer);
+    lockoutTimer = setInterval(() => {
+      const left = Math.ceil((lockoutUntil - Date.now()) / 1000);
+      const el = document.getElementById("countdown");
+      if (el) el.textContent = Math.max(0, left);
+      if (left <= 0) {
+        clearInterval(lockoutTimer);
+        sessionStorage.removeItem("tn_lockout");
+        renderLogin();
+      }
+    }, 1000);
+    return;
+  }
+
+  authLayout(`
+    ${secBadge}
+    <h1>Operations Command</h1>
+    <p class="muted" style="margin:0 0 4px">Restricted access for verified Townaija administrators.</p>
+    ${msg ? `<div class="err-text" role="alert">${esc(msg)}</div>` : ""}
+    <form id="login" autocomplete="off" style="display:flex;flex-direction:column;gap:16px">
+      <label class="field">
+        Phone number
+        <input class="input num" id="phone" inputmode="tel" autocomplete="username" placeholder="0803 123 4567" required autofocus>
+      </label>
+      <label class="field">
+        Password
+        <div class="pw-wrap">
+          <input class="input" id="pw" type="password" autocomplete="current-password" placeholder="••••••••••••" required>
+          <button type="button" class="pw-toggle" id="pw-btn" aria-label="Toggle password visibility">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </label>
+      <button class="btn primary" type="submit" id="submit-btn" style="margin-top:6px">Sign in</button>
+    </form>
+    <p class="audit-notice">Session is protected with cryptographic verification and audited for security.</p>
+  `);
+
+  const pwInput = document.getElementById("pw");
+  const pwBtn = document.getElementById("pw-btn");
+  if (pwBtn && pwInput) {
+    pwBtn.onclick = () => {
+      const isPw = pwInput.type === "password";
+      pwInput.type = isPw ? "text" : "password";
+      pwBtn.style.color = isPw ? "var(--fg)" : "var(--muted)";
+    };
+  }
+
+  document.getElementById("login").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById("submit-btn");
+    const phoneVal = document.getElementById("phone").value.trim();
+    const pwVal = document.getElementById("pw").value;
+
+    btn.disabled = true;
+    btn.textContent = "Verifying credentials…";
+
+    try {
+      state.me = await state.api.login(phoneVal, pwVal);
+      failCount = 0;
+      sessionStorage.removeItem("tn_lockout");
+      start();
+    } catch (err) {
+      failCount++;
+      if (failCount >= 5) {
+        sessionStorage.setItem("tn_lockout", String(Date.now() + 60000));
+        renderLogin();
+        return;
+      }
+      renderLogin("Invalid administrative credentials or insufficient privileges.");
+    }
+  });
+}
+
+function start() {
+  if (state.unsub) state.unsub();
+  let t;
+  state.unsub = state.api.onChange(() => {
+    clearTimeout(t);
+    t = setTimeout(() => {
+      if (!document.querySelector(".modal")) {
+        render();
+        if (drawerRefresh) drawerRefresh();
+      }
+    }, 800);
+  });
+  clearInterval(state.poll);
+  state.poll = setInterval(() => {
+    if (document.visibilityState === "visible" && !document.querySelector(".modal") && !document.getElementById("drawer") && route() === "overview") {
+      render();
+    }
+  }, 30000);
+  state.api.settings().then((x) => { state.cache.settings = x.settings; }).catch(() => {});
+  render();
+}
+window.addEventListener("hashchange", () => { state.filters.q = ""; closeDrawer(); if (state.me) render(); });
+
+async function boot(cfg) {
+  if (cfg && (!window.convex || !window.convex.ConvexClient)) {
+    authLayout(`<div><h1>Security Error</h1><p class="muted">Security communication module failed to load. Please refresh your browser.</p></div>`);
+    return;
+  }
+  state.api = liveApi(cfg || readConfig());
+  try {
+    state.me = await state.api.session();
+  } catch (e) {
+    state.me = null;
+    renderLogin();
+    return;
+  }
+  if (!state.me) {
+    renderLogin();
+    return;
+  }
+  start();
+}
+boot(readConfig());
+})();
+</script>

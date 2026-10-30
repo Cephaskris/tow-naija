@@ -1,0 +1,19 @@
+{
+  "name": "townaija-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Townaija backend on Convex: database, business rules, auth, file storage and scheduled housekeeping.",
+  "scripts": {
+    "dev": "convex dev",
+    "deploy": "convex deploy",
+    "keys": "node scripts/generateKeys.mjs"
+  },
+  "dependencies": {
+    "@auth/core": "^0.41.1",
+    "@convex-dev/auth": "^0.0.96",
+    "convex": "^1.48.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}
