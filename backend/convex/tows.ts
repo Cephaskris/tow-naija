@@ -85,6 +85,7 @@ export const createTowRequest = mutation({
       dropoff_lng: v.number(),
       dropoff_address: v.optional(v.string()),
       vehicle_type: vehicleTypeValidator,
+      vehicle_desc: v.optional(v.string()),
       vehicle_make: v.optional(v.string()),
       vehicle_model: v.optional(v.string()),
       vehicle_year: v.optional(v.number()),
@@ -160,10 +161,10 @@ export const createTowRequest = mutation({
       throw new Error(`Your offer is too low. Minimum for this trip is ${naira(fareFloor)}.`);
     }
 
-    const desc = [p.vehicle_make, p.vehicle_model, p.vehicle_year, p.vehicle_color]
-      .filter(Boolean)
-      .join(" ")
-      .slice(0, 120);
+    const desc = (
+      p.vehicle_desc ||
+      [p.vehicle_make, p.vehicle_model, p.vehicle_year, p.vehicle_color].filter(Boolean).join(" ")
+    ).slice(0, 120) || "Vehicle";
 
     const now = Date.now();
     const requestId = await ctx.db.insert("tow_requests", {
