@@ -23,8 +23,17 @@ for key, token in (("SUPPORT_PHONE", "[SUPPORT PHONE]"), ("SUPPORT_EMAIL", "[SUP
     value = env(key)
     page = page.replace(f'<span style="color: #afafaf">{token}</span>', f'<span style="color: #afafaf">{value}</span>' if value else "")
 (dist / "index.html").write_text(page, encoding="utf-8")
+(root / "index.html").write_text(page, encoding="utf-8")
 
 subprocess.run([sys.executable, str(root / "admin" / "build.py")], check=True)
-(dist / "admin" / "index.html").write_text((root / "admin" / "dist" / "index.html").read_text(encoding="utf-8"), encoding="utf-8")
-print("Built dist/ (landing at /, admin at /admin/, assets at /assets/)")
+admin_html = (root / "admin" / "dist" / "index.html").read_text(encoding="utf-8")
+(dist / "admin" / "index.html").write_text(admin_html, encoding="utf-8")
+
+# Cloudflare Pages / Netlify SPA redirects
+redirects = "/admin       /admin/index.html   200\n/admin/*     /admin/index.html   200\n"
+(dist / "_redirects").write_text(redirects, encoding="utf-8")
+(root / "_redirects").write_text(redirects, encoding="utf-8")
+
+print("Built dist/ and root (landing at /, admin at /admin/, assets at /assets/)")
+
 

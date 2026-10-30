@@ -1,0 +1,9 @@
+{
+  "name": "townaija",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Townaija — Nigeria On-Demand Towing Marketplace",
+  "scripts": {
+    "build": "python3 build_site.py"
+  }
+}

@@ -5,7 +5,6 @@ backend/node_modules/
 app/node_modules/
 
 # Builds and generated bundles
-dist/
 admin/dist/
 .expo/
 *.apk
