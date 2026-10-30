@@ -1,5 +1,24 @@
-import { internalMutation } from "./_generated/server";
+import { mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+
+export const updateAppRelease = mutation({
+  args: {
+    apk_url: v.string(),
+    latest_version: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db.query("app_settings").first();
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        apk_url: args.apk_url,
+        latest_version: args.latest_version,
+        updated_at: Date.now(),
+      });
+      return { success: true, id: existing._id };
+    }
+    return { success: false };
+  },
+});
 
 export const initDefaults = internalMutation({
   args: {},

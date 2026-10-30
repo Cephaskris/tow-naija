@@ -652,6 +652,8 @@ export const saveSettings = mutation({
       bank_name: v.optional(v.string()),
       bank_account_name: v.optional(v.string()),
       bank_account_number: v.optional(v.string()),
+      apk_url: v.optional(v.string()),
+      latest_version: v.optional(v.string()),
     }),
   },
   handler: async (ctx, args) => {
@@ -676,6 +678,8 @@ export const saveSettings = mutation({
         bank_name: args.p.bank_name ?? "GTBank",
         bank_account_name: args.p.bank_account_name ?? "Townaija Ltd",
         bank_account_number: args.p.bank_account_number ?? "0123456789",
+        apk_url: args.p.apk_url,
+        latest_version: args.p.latest_version,
         updated_at: now,
       });
     }

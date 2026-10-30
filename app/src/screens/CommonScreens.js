@@ -39,10 +39,28 @@ export function Menu({ params }) {
     if (!phone) { toast.show('Support line coming soon.'); return; }
     Linking.openURL(`tel:${phone.replace(/\s/g, '')}`).catch(() => toast.show(phone));
   };
+  const updateSoftware = () => {
+    const apkUrl = settings?.apk_url || "https://charming-donkey-521.convex.cloud/api/storage/1d6de9bd-73fb-454c-8f2b-1896843598c5";
+    const curVer = "1.2.0";
+    const latest = settings?.latest_version || curVer;
+    Alert.alert(
+      'Update software',
+      `Current Version: v${curVer}\nLatest Version: v${latest}\n\nDownload and install the latest APK update for Townaija.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Download & Install',
+          onPress: () => {
+            Linking.openURL(apkUrl).catch(() => toast.show('Could not open download link'));
+          },
+        },
+      ]
+    );
+  };
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
       <Screen bottomSpace={tab ? TAB_SPACE + 10 : 24}>
-        <TopBar onBack={tab ? null : nav.pop} title="Profile" />
+        <TopBar onBack={tab ? null : nav.pop} title="Settings & Profile" />
         <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
           <Avatar name={profile?.full_name} size={60} tone="accent" />
           <View style={{ flex: 1, gap: 2 }}>
@@ -65,11 +83,12 @@ export function Menu({ params }) {
           {!tab ? <MenuItem icon="clock" label={isOp ? 'My jobs' : 'My tows'} onPress={() => nav.push('History')} /> : null}
           {isOp && !tab ? <MenuItem icon="credit-card" label="Wallet" onPress={() => nav.push('Wallet')} /> : null}
           <MenuItem icon="bell" label="Notifications" onPress={() => nav.push('Notifications')} />
+          <MenuItem icon="download" label="Update software" sub={settings?.latest_version ? `v${settings.latest_version} · Tap to update` : "Check for updates"} onPress={updateSoftware} />
           <MenuItem icon="help-circle" label="Contact support" sub={settings?.support_phone || undefined} onPress={support} />
           <MenuItem icon="log-out" label="Log out" danger onPress={out} last />
         </Card>
         <Gap h={20} />
-        <T v="small" muted center>Townaija · v1.1 · Made for Nigerian roads</T>
+        <T v="small" muted center>Townaija · v1.2 · Made for Nigerian roads</T>
       </Screen>
       {tab ? <TabBar items={isOp ? OPERATOR_TABS : CUSTOMER_TABS} active="Menu" onChange={(k) => nav.reset(k, { tab: true })} /> : null}
     </View>

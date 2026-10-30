@@ -66,6 +66,8 @@ export default defineSchema({
     bank_name: v.string(),
     bank_account_name: v.string(),
     bank_account_number: v.string(),
+    apk_url: v.optional(v.string()),
+    latest_version: v.optional(v.string()),
     updated_at: v.number(),
   }),
 

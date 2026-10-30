@@ -666,8 +666,11 @@ async function pageSettings() {
     ${num("auto_confirm_hours", "Auto-confirm delivery after (h)", "If the customer forgets", "0.5")}
     ${num("road_factor", "Road distance factor", "Straight line × this = road km", "0.05")}
   </div></section>
-  <section class="panel"><h2>Bank details for top-ups</h2><div class="form-grid">
+  <section class="panel"><h2>Bank details & Support</h2><div class="form-grid">
     ${txt("bank_name", "Bank", "Shown to operators in the app")}${txt("bank_account_name", "Account name", "")}${txt("bank_account_number", "Account number", "")}${txt("support_phone", "Support phone", "Shown in the app")}
+  </div></section>
+  <section class="panel"><h2>App Software & APK Updates</h2><div class="form-grid">
+    ${txt("latest_version", "Latest App Version", "e.g. 1.2.0")}${txt("apk_url", "APK Download URL", "Direct URL for in-app software updates")}
   </div><div class="actions" style="margin-top:16px"><button class="btn primary" id="save-settings">Save settings</button></div></section>
 
   <section class="panel"><h2>Fare guide <small>₦ · what customers see as the recommended price</small></h2>
@@ -853,7 +856,7 @@ function bindPage(r) {
       const keys = ["commission_pct", "min_wallet_balance", "offer_floor_pct", "search_radius_km", "max_search_radius_km", "radius_expand_after_min", "request_expiry_min", "bid_expiry_min", "auto_confirm_hours", "road_factor"];
       const p = {};
       keys.forEach((k) => { p[k] = Number(main.querySelector("#set-" + k).value); });
-      ["bank_name", "bank_account_name", "bank_account_number", "support_phone"].forEach((k) => { p[k] = main.querySelector("#set-" + k).value.trim(); });
+      ["bank_name", "bank_account_name", "bank_account_number", "support_phone", "latest_version", "apk_url"].forEach((k) => { p[k] = (main.querySelector("#set-" + k).value || "").trim(); });
       if (await run(() => state.api.saveSettings(p), "Settings saved")) render();
       return;
     }
