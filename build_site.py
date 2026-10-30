@@ -29,11 +29,6 @@ subprocess.run([sys.executable, str(root / "admin" / "build.py")], check=True)
 admin_html = (root / "admin" / "dist" / "index.html").read_text(encoding="utf-8")
 (dist / "admin" / "index.html").write_text(admin_html, encoding="utf-8")
 
-# Cloudflare Pages / Netlify SPA redirects
-redirects = "/admin       /admin/index.html   200\n/admin/*     /admin/index.html   200\n"
-(dist / "_redirects").write_text(redirects, encoding="utf-8")
-(root / "_redirects").write_text(redirects, encoding="utf-8")
-
 print("Built dist/ and root (landing at /, admin at /admin/, assets at /assets/)")
 
 
