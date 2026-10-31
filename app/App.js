@@ -17,8 +17,6 @@ import { CustomerHome, NewRequest, PickLocation, RequestLive, Report, History } 
 import { OperatorOnboard, OperatorStatus, OperatorHome, OperatorJob, OperatorActive, Wallet } from './src/screens/OperatorScreens';
 import { Menu, Notifications, Blocked } from './src/screens/CommonScreens';
 
-SplashScreen.preventAutoHideAsync().catch(() => {});
-
 const SCREENS = {
   Welcome, Signup, Login,
   CustomerHome, NewRequest, PickLocation, RequestLive, Report, History,
@@ -121,28 +119,16 @@ function Root() {
 }
 
 export default function App() {
-  const [fontsLoaded, fontError] = useFonts({ Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_800ExtraBold });
-  const [fontTimeout, setFontTimeout] = useState(false);
+  useFonts({ Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_800ExtraBold });
   const [backend, setBackend] = useState(0);
+
+  useEffect(() => {
+    // Dismiss native splash screen as fast as possible on mount
+    SplashScreen.hideAsync().catch(() => {});
+  }, []);
 
   useEffect(() => onBackendChange(() => setBackend((n) => n + 1)), []);
 
-  // Hard safety timeout: ALWAYS hide native splash screen within 1.2s max so it never hangs
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setFontTimeout(true);
-      SplashScreen.hideAsync().catch(() => {});
-    }, 1200);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync().catch(() => {});
-    }
-  }, [fontsLoaded, fontError]);
-
-  if (!fontsLoaded && !fontError && !fontTimeout) return null;
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" backgroundColor={C.bg} />

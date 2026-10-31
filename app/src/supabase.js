@@ -11,20 +11,42 @@ const AUTH_TOKEN_KEY = 'townaija.convex_token';
 const AUTH_REFRESH_TOKEN_KEY = 'townaija.convex_refresh_token';
 const AUTH_USER_KEY = 'townaija.convex_user';
 
-let convexClient = null;
+let _convexClient = null;
 let currentToken = null;
 let currentRefreshToken = null;
 let currentSessionUser = null;
 const authListeners = new Set();
 
-if (IS_CONFIGURED) {
-  convexClient = new ConvexClient(CONVEX_URL);
+export function getConvexClient() {
+  if (!_convexClient && IS_CONFIGURED) {
+    try {
+      _convexClient = new ConvexClient(CONVEX_URL);
+    } catch (e) {
+      console.warn('ConvexClient init deferred/failed:', e);
+    }
+  }
+  return _convexClient;
 }
 
+const convexClient = new Proxy({}, {
+  get(target, prop) {
+    const client = getConvexClient();
+    if (!client) {
+      return () => Promise.reject(new Error('Convex client not initialized'));
+    }
+    const val = client[prop];
+    if (typeof val === 'function') {
+      return val.bind(client);
+    }
+    return val;
+  },
+});
+
 async function fetchAuthToken({ forceRefreshToken } = {}) {
-  if (forceRefreshToken && currentRefreshToken && convexClient) {
+  const client = getConvexClient();
+  if (forceRefreshToken && currentRefreshToken && client) {
     try {
-      const res = await convexClient.action('auth:signIn', {
+      const res = await client.action('auth:signIn', {
         refreshToken: currentRefreshToken,
       });
       if (res?.tokens?.token) {
@@ -89,8 +111,9 @@ function createLiveConvexAdapter() {
             const userStr = await AsyncStorage.getItem(AUTH_USER_KEY);
             if (userStr) currentSessionUser = JSON.parse(userStr);
           }
-          if (currentToken && convexClient) {
-            convexClient.setAuth(fetchAuthToken);
+          const client = getConvexClient();
+          if (currentToken && client) {
+            client.setAuth(fetchAuthToken);
           }
           if (!currentToken || !currentSessionUser) {
             return { data: { session: null } };
@@ -209,8 +232,9 @@ function createLiveConvexAdapter() {
         currentToken = null;
         currentRefreshToken = null;
         currentSessionUser = null;
-        if (convexClient) {
-          try { convexClient.setAuth(async () => null); } catch (e) {}
+        const client = getConvexClient();
+        if (client) {
+          try { client.setAuth(async () => null); } catch (e) {}
         }
         try {
           await AsyncStorage.multiRemove([AUTH_TOKEN_KEY, AUTH_REFRESH_TOKEN_KEY, AUTH_USER_KEY]);
