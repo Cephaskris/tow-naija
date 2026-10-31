@@ -39,7 +39,6 @@ export function AuthProvider({ children }) {
       }
     } catch (e) {
       console.warn('loadUser error:', e);
-      await signOut();
     }
   }, [signOut]);
 
@@ -50,11 +49,26 @@ export function AuthProvider({ children }) {
         const saved = await AsyncStorage.getItem(MODE_KEY);
         if (saved === 'operator' || saved === 'customer') setModeState(saved);
       } catch (e) { /* ignore */ }
-      const { data } = await supabase.auth.getSession();
-      if (!mounted) return;
-      setSession(data.session);
-      await loadUser(data.session?.user?.id);
-      if (mounted) setLoading(false);
+
+      try {
+        const sessionRes = await Promise.race([
+          supabase.auth.getSession(),
+          new Promise((resolve) => setTimeout(() => resolve({ data: { session: null } }), 3000)),
+        ]);
+        if (!mounted) return;
+        const s = sessionRes?.data?.session || null;
+        setSession(s);
+        if (s?.user?.id) {
+          await Promise.race([
+            loadUser(s.user.id),
+            new Promise((resolve) => setTimeout(resolve, 3500)),
+          ]);
+        }
+      } catch (err) {
+        console.warn('Auth init failed:', err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
     })();
     const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);

@@ -69,7 +69,15 @@ function Banner() {
 
 function Root() {
   const { loading, session, profile, operator, mode, refresh, signOut } = useAuth();
-  useEffect(() => { if (!loading) SplashScreen.hideAsync().catch(() => {}); }, [loading]);
+  
+  // Unconditionally dismiss native splash screen as soon as Root mounts
+  useEffect(() => {
+    SplashScreen.hideAsync().catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!loading) SplashScreen.hideAsync().catch(() => {});
+  }, [loading]);
 
   useEffect(() => {
     if (session && !profile && !loading) {
@@ -114,9 +122,27 @@ function Root() {
 
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({ Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_800ExtraBold });
+  const [fontTimeout, setFontTimeout] = useState(false);
   const [backend, setBackend] = useState(0);
+
   useEffect(() => onBackendChange(() => setBackend((n) => n + 1)), []);
-  if (!fontsLoaded && !fontError) return null;
+
+  // Hard safety timeout: ALWAYS hide native splash screen within 1.2s max so it never hangs
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFontTimeout(true);
+      SplashScreen.hideAsync().catch(() => {});
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError && !fontTimeout) return null;
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" backgroundColor={C.bg} />
@@ -128,6 +154,7 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
+
 
 const styles = StyleSheet.create({
   banner: { position: 'absolute', left: 12, right: 12, zIndex: 50, elevation: 30 },
