@@ -310,6 +310,7 @@ function readConfig() {
 function liveApi(cfg) {
   const client = new window.convex.ConvexClient(cfg.url);
   const ok = (p) => p.catch((err) => { throw new Error(err.message || String(err)); });
+  const clearAuth = () => client.setAuth(() => Promise.resolve(null));
   return {
     mode: "live",
     async session() {
@@ -319,12 +320,12 @@ function liveApi(cfg) {
       const cur = await ok(client.query("users:current"));
       if (!cur || !cur.user) {
         localStorage.removeItem("townaija_admin_token");
-        client.clearAuth();
+        clearAuth();
         return null;
       }
       if (!cur.user.is_admin) {
         localStorage.removeItem("townaija_admin_token");
-        client.clearAuth();
+        clearAuth();
         throw new Error("This account is not an admin.");
       }
       return cur.user;
@@ -345,14 +346,14 @@ function liveApi(cfg) {
       const cur = await ok(client.query("users:current"));
       if (!cur?.user?.is_admin) {
         localStorage.removeItem("townaija_admin_token");
-        client.clearAuth();
+        clearAuth();
         throw new Error("This account is not an admin.");
       }
       return cur.user;
     },
     logout() {
       localStorage.removeItem("townaija_admin_token");
-      client.clearAuth();
+      clearAuth();
       return client.action("auth:signOut", {}).catch(() => {});
     },
     stats: () => ok(client.query("admin:stats")),
@@ -1018,8 +1019,13 @@ function renderLogin(msg) {
         renderLogin();
         return;
       }
-      renderLogin("Invalid administrative credentials or insufficient privileges.");
+      const m = err?.message || "";
+      const displayMsg = m.includes("Invalid credentials") || m.includes("InvalidSecret") || m.includes("InvalidAccountId")
+        ? "Invalid phone number or password."
+        : m || "Invalid administrative credentials or insufficient privileges.";
+      renderLogin(displayMsg);
     }
+
   });
 }
 

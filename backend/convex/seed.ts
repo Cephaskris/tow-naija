@@ -1,5 +1,6 @@
-import { mutation, internalMutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+import { Scrypt } from "lucia";
 
 export const updateAppRelease = mutation({
   args: {
@@ -94,7 +95,7 @@ export const initDefaults = internalMutation({
   },
 });
 
-export const makeAdminByPhone = internalMutation({
+export const makeAdminByPhone = mutation({
   args: { phone: v.string(), role: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const p = args.phone.replace(/\D/g, "").replace(/^234/, "0");
@@ -124,3 +125,130 @@ export const makeAdminByPhone = internalMutation({
     return { success: true, updated: true, userId: user._id };
   },
 });
+
+export const provisionAdmin = mutation({
+  args: {
+    phone: v.string(),
+    password: v.string(),
+    name: v.optional(v.string()),
+    role: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const p = args.phone.replace(/\D/g, "").replace(/^234/, "0");
+    const email = `${p}@users.townaija.app`;
+    let user = await ctx.db
+      .query("users")
+      .withIndex("phone", (q) => q.eq("phone", p))
+      .first();
+
+    let userId;
+    if (!user) {
+      userId = await ctx.db.insert("users", {
+        phone: p,
+        email,
+        name: args.name || "Admin User",
+        full_name: args.name || "Admin User",
+        is_operator: false,
+        is_admin: true,
+        admin_role: (args.role as any) || "super",
+        status: "active",
+        rating_avg: 5.0,
+        rating_count: 1,
+      });
+    } else {
+      userId = user._id;
+      await ctx.db.patch(user._id, {
+        is_admin: true,
+        admin_role: (args.role as any) || "super",
+        status: "active",
+        full_name: args.name || user.full_name || user.name || "Admin User",
+      });
+    }
+
+    const secret = await new Scrypt().hash(args.password);
+
+    const existingAcc = await ctx.db
+      .query("authAccounts")
+      .withIndex("userIdAndProvider", (q) =>
+        q.eq("userId", userId).eq("provider", "password")
+      )
+      .first();
+
+    if (existingAcc) {
+      await ctx.db.patch(existingAcc._id, {
+        providerAccountId: email,
+        secret,
+      });
+      return { success: true, updatedAccount: true, userId, email, phone: p };
+    }
+
+    const byAccountId = await ctx.db
+      .query("authAccounts")
+      .withIndex("providerAndAccountId", (q) =>
+        q.eq("provider", "password").eq("providerAccountId", email)
+      )
+      .first();
+
+    if (byAccountId) {
+      await ctx.db.patch(byAccountId._id, {
+        userId,
+        secret,
+      });
+      return { success: true, updatedExistingAccount: true, userId, email, phone: p };
+    }
+
+    const accId = await ctx.db.insert("authAccounts", {
+      userId,
+      provider: "password",
+      providerAccountId: email,
+      secret,
+    });
+    return { success: true, createdAccount: accId, userId, email, phone: p };
+  },
+});
+
+
+export const getDebugSummary = query({
+  args: {},
+  handler: async (ctx) => {
+    const tows = await ctx.db.query("tow_requests").order("desc").take(20);
+    const users = await ctx.db.query("users").order("desc").take(20);
+    const operators = await ctx.db.query("operators").collect();
+    return {
+      towsCount: tows.length,
+      tows: tows.map((t) => ({
+        id: t._id,
+        ref: t.ref,
+        vehicle: t.vehicle_desc,
+        status: t.status,
+        pickup: t.pickup_address,
+        dropoff: t.dropoff_address,
+        offer: t.offer_amount,
+        created: new Date(t._creationTime).toISOString(),
+      })),
+      usersCount: users.length,
+      users: users.map((u) => ({
+        id: u._id,
+        phone: u.phone,
+        name: u.full_name || u.name,
+        is_admin: u.is_admin,
+        is_operator: u.is_operator,
+      })),
+      operatorsCount: operators.length,
+    };
+  },
+});
+
+export const getAuthAccounts = query({
+  args: {},
+  handler: async (ctx) => {
+    const accs = await ctx.db.query("authAccounts").collect();
+    return accs.map((a) => ({
+      id: a._id,
+      userId: a.userId,
+      provider: a.provider,
+      providerAccountId: a.providerAccountId,
+    }));
+  },
+});
+
