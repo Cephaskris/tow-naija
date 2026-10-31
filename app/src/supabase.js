@@ -467,12 +467,29 @@ export const supabase = new Proxy({}, {
 
 export function friendlyError(message) {
   const m = String(message || '');
-  if (/network request failed|failed to fetch|fetch failed/i.test(m)) return 'No internet connection. Check your data and try again.';
-  if (/invalid login credentials|invalid credentials/i.test(m)) return 'Wrong phone number or password.';
-  if (/already exists|already registered/i.test(m)) return 'An account with this phone number already exists. Log in instead.';
-  if (/password.*least/i.test(m)) return 'Password must be at least 6 characters.';
-  if (/JWT|token|session/i.test(m)) return 'Your session expired. Please log in again.';
-  return m.replace(/^Uncaught Error:\s*|^Error:\s*|^.*?ERROR:\s*/, '');
+  if (/InvalidSecret|InvalidAccountId|AccountNotFound|invalid login credentials|invalid credentials|invalid secret/i.test(m)) {
+    return 'Incorrect phone number or password. Please verify and try again.';
+  }
+  if (/network request failed|failed to fetch|fetch failed|network error/i.test(m)) {
+    return 'No internet connection. Check your data and try again.';
+  }
+  if (/already exists|already registered/i.test(m)) {
+    return 'An account with this phone number already exists. Log in instead.';
+  }
+  if (/password.*least|least 6 characters/i.test(m)) {
+    return 'Password must be at least 6 characters.';
+  }
+  if (/JWT|token|session|refreshToken/i.test(m)) {
+    return 'Your session expired. Please log in again.';
+  }
+
+  const uncaughtMatch = m.match(/Uncaught (?:Error|ConvexError):\s*([^\n\r]+)/);
+  if (uncaughtMatch && uncaughtMatch[1]) {
+    return uncaughtMatch[1].trim();
+  }
+
+  const clean = m.replace(/^\[CONVEX[^\]]*\]\s*/i, '').replace(/\[Request ID:[^\]]*\]\s*/i, '').split('\n')[0].replace(/^Server Error:?\s*/i, '').trim();
+  return clean || 'An unexpected error occurred. Please try again.';
 }
 
 export async function rpc(fn, args = {}) {

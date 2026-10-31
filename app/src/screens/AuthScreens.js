@@ -3,7 +3,7 @@ import { Dimensions, Pressable, ScrollView, StyleSheet, View } from 'react-nativ
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../auth';
 import { useNav } from '../nav';
-import { hasLiveBackend, isDemo, setDemoBackend } from '../supabase';
+import { hasLiveBackend, isDemo, setDemoBackend, friendlyError, getConvexHttpClient } from '../supabase';
 import { C, R } from '../theme';
 import { ArrowBtn, Badge, Btn, Dots, Field, Gap, Icon, Screen, T, Title, TopBar } from '../ui';
 
@@ -103,19 +103,38 @@ export function Login() {
   const [f, setF] = useState({ phone: '', password: '' });
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [resetMode, setResetMode] = useState(false);
+
   const submit = async () => {
     setErr(''); setBusy(true);
+    if (resetMode) {
+      try {
+        if (!f.phone || !f.password) throw new Error('Enter your phone number and new password.');
+        if (f.password.length < 6) throw new Error('Password must be at least 6 characters.');
+        const http = getConvexHttpClient();
+        if (!http) throw new Error('Backend not connected');
+        await http.mutation('users:resetPassword', { phone: f.phone, new_password: f.password });
+        await signIn(f);
+      } catch (e) {
+        setErr(friendlyError(e.message));
+        setBusy(false);
+      }
+      return;
+    }
     try { await signIn(f); } catch (e) { setErr(e.message); setBusy(false); }
   };
   return (
-    <Screen footer={<Btn title="Log in" onPress={submit} loading={busy} />}>
-      <TopBar onBack={nav.pop} title="Welcome back" sub="Log in with your phone number" />
+    <Screen footer={<Btn title={resetMode ? "Set New Password & Log In" : "Log in"} onPress={submit} loading={busy} />}>
+      <TopBar onBack={resetMode ? () => setResetMode(false) : nav.pop} title={resetMode ? "Reset Password" : "Welcome back"} sub={resetMode ? "Enter your phone and new password" : "Log in with your phone number"} />
       <Gap h={8} />
       <View style={{ gap: 14 }}>
         <Field label="Phone number" icon="phone" value={f.phone} onChangeText={(v) => setF({ ...f, phone: v })} placeholder="0803 123 4567" keyboardType="phone-pad" autoComplete="tel" />
-        <Field label="Password" icon="lock" value={f.password} onChangeText={(v) => setF({ ...f, password: v })} secureTextEntry autoComplete="current-password" />
+        <Field label={resetMode ? "New password" : "Password"} icon="lock" value={f.password} onChangeText={(v) => setF({ ...f, password: v })} placeholder={resetMode ? "At least 6 characters" : undefined} secureTextEntry autoComplete={resetMode ? "new-password" : "current-password"} />
         {err ? <T color={C.red}>{err}</T> : null}
-        <Pressable onPress={() => nav.replace('Signup')}><T v="label">New here? <T v="label" style={{ textDecorationLine: 'underline' }}>Create an account</T></T></Pressable>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+          <Pressable onPress={() => nav.replace('Signup')}><T v="label">New here? <T v="label" style={{ textDecorationLine: 'underline' }}>Create account</T></T></Pressable>
+          <Pressable onPress={() => { setResetMode(!resetMode); setErr(''); }}><T v="label" style={{ textDecorationLine: 'underline' }}>{resetMode ? "Back to Login" : "Forgot password?"}</T></Pressable>
+        </View>
       </View>
     </Screen>
   );

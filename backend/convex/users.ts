@@ -1,6 +1,8 @@
 import { query, mutation, internalQuery } from "./_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { Scrypt } from "lucia";
+import { normPhone, phoneEmail } from "./lib";
 
 export const byPhone = internalQuery({
   args: { phone: v.string() },
@@ -74,3 +76,44 @@ export const updateProfile = mutation({
     });
   },
 });
+
+export const resetPassword = mutation({
+  args: {
+    phone: v.string(),
+    new_password: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const p = normPhone(args.phone);
+    if (!p) throw new ConvexError("Enter a valid Nigerian phone number.");
+    if (!args.new_password || args.new_password.length < 6) {
+      throw new ConvexError("Password must be at least 6 characters.");
+    }
+    const user = await ctx.db
+      .query("users")
+      .withIndex("phone", (q) => q.eq("phone", p))
+      .first();
+    if (!user) {
+      throw new ConvexError("No account found with this phone number. Please register first.");
+    }
+    const email = phoneEmail(p);
+    const secret = await new Scrypt().hash(args.new_password);
+    const acc = await ctx.db
+      .query("authAccounts")
+      .withIndex("userIdAndProvider", (q) =>
+        q.eq("userId", user._id).eq("provider", "password")
+      )
+      .first();
+    if (acc) {
+      await ctx.db.patch(acc._id, { secret, providerAccountId: email });
+    } else {
+      await ctx.db.insert("authAccounts", {
+        userId: user._id,
+        provider: "password",
+        providerAccountId: email,
+        secret,
+      });
+    }
+    return { success: true };
+  },
+});
+
