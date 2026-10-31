@@ -77,18 +77,11 @@ function Root() {
     if (!loading) SplashScreen.hideAsync().catch(() => {});
   }, [loading]);
 
-  useEffect(() => {
-    if (session && !profile && !loading) {
-      const timer = setTimeout(() => {
-        refresh();
-      }, 3500);
-      return () => clearTimeout(timer);
-    }
-  }, [session, profile, loading, refresh]);
+  const userProfile = profile || session?.user;
 
   if (loading) return <Loading />;
   if (!session) return <Navigator key="guest" initial={{ name: 'Welcome' }} screens={SCREENS} />;
-  if (!profile) {
+  if (!userProfile) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24, backgroundColor: C.bg }}>
         <StatusBar style="dark" />
@@ -100,7 +93,7 @@ function Root() {
       </View>
     );
   }
-  if (profile.status === 'blocked') return <Blocked />;
+  if (userProfile.status === 'blocked') return <Blocked />;
 
   let initial = 'CustomerHome';
   if (mode === 'operator') {

@@ -42,7 +42,7 @@ async function main() {
   const downloadUrl = `https://charming-donkey-521.convex.cloud/api/storage/${storageId}`;
   console.log('Uploaded successfully! Download URL:', downloadUrl);
 
-  const newVersion = '1.2.3';
+  const newVersion = '1.2.4';
   console.log(`Updating app release in settings to v${newVersion}...`);
   await client.mutation('seed:updateAppRelease', {
     apk_url: downloadUrl,

@@ -1,6 +1,6 @@
 import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ConvexClient } from 'convex/browser';
+import { ConvexClient, ConvexHttpClient } from 'convex/browser';
 import { CONVEX_URL, CONVEX_SITE_URL, IS_CONFIGURED } from './config';
 /*
   Townaija backend adapter powered exclusively by Convex (charming-donkey-521).
@@ -12,6 +12,7 @@ const AUTH_REFRESH_TOKEN_KEY = 'townaija.convex_refresh_token';
 const AUTH_USER_KEY = 'townaija.convex_user';
 
 let _convexClient = null;
+let _httpClient = null;
 let currentToken = null;
 let currentRefreshToken = null;
 let currentSessionUser = null;
@@ -28,6 +29,17 @@ export function getConvexClient() {
   return _convexClient;
 }
 
+export function getConvexHttpClient() {
+  if (!_httpClient && IS_CONFIGURED) {
+    try {
+      _httpClient = new ConvexHttpClient(CONVEX_URL);
+    } catch (e) {
+      console.warn('ConvexHttpClient init deferred/failed:', e);
+    }
+  }
+  return _httpClient;
+}
+
 const convexClient = new Proxy({}, {
   get(target, prop) {
     const client = getConvexClient();
@@ -42,11 +54,62 @@ const convexClient = new Proxy({}, {
   },
 });
 
-async function fetchAuthToken({ forceRefreshToken } = {}) {
-  const client = getConvexClient();
-  if (forceRefreshToken && currentRefreshToken && client) {
+let _cachedUserData = null;
+let _fetchUserDataPromise = null;
+
+export async function fetchCurrentUserData() {
+  if (_fetchUserDataPromise) return _fetchUserDataPromise;
+
+  _fetchUserDataPromise = (async () => {
     try {
-      const res = await client.action('auth:signIn', {
+      const http = getConvexHttpClient();
+      if (http && currentToken) {
+        http.setAuth(currentToken);
+        const data = await Promise.race([
+          http.query('users:current'),
+          new Promise((resolve) => setTimeout(() => resolve(null), 3000)),
+        ]);
+        if (data?.user) {
+          _cachedUserData = data;
+          currentSessionUser = data.user;
+          try { await AsyncStorage.setItem(AUTH_USER_KEY, JSON.stringify(data.user)); } catch (e) {}
+          return data;
+        }
+      }
+
+      const ws = getConvexClient();
+      if (ws) {
+        const data = await Promise.race([
+          ws.query('users:current'),
+          new Promise((resolve) => setTimeout(() => resolve(null), 3000)),
+        ]);
+        if (data?.user) {
+          _cachedUserData = data;
+          currentSessionUser = data.user;
+          try { await AsyncStorage.setItem(AUTH_USER_KEY, JSON.stringify(data.user)); } catch (e) {}
+          return data;
+        }
+      }
+    } catch (e) {
+      console.warn('fetchCurrentUserData error:', e);
+    } finally {
+      _fetchUserDataPromise = null;
+    }
+
+    if (currentSessionUser) {
+      return { user: currentSessionUser, operator: null, settings: null };
+    }
+    return _cachedUserData;
+  })();
+
+  return _fetchUserDataPromise;
+}
+
+async function fetchAuthToken({ forceRefreshToken } = {}) {
+  const http = getConvexHttpClient();
+  if (forceRefreshToken && currentRefreshToken && http) {
+    try {
+      const res = await http.action('auth:signIn', {
         refreshToken: currentRefreshToken,
       });
       if (res?.tokens?.token) {
@@ -143,7 +206,10 @@ function createLiveConvexAdapter() {
       async signUp({ email, password, options }) {
         try {
           const m = options?.data || {};
-          const res = await convexClient.action('auth:signIn', {
+          const http = getConvexHttpClient();
+          if (!http) throw new Error('Backend not configured');
+
+          const res = await http.action('auth:signIn', {
             provider: 'password',
             params: {
               flow: 'signUp',
@@ -158,17 +224,18 @@ function createLiveConvexAdapter() {
 
           currentToken = token;
           currentRefreshToken = res?.tokens?.refreshToken || null;
-          convexClient.setAuth(fetchAuthToken);
           await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
           if (currentRefreshToken) {
             await AsyncStorage.setItem(AUTH_REFRESH_TOKEN_KEY, currentRefreshToken);
           }
 
-          // Get current user profile or fallback to sign-up details
+          // Fetch full user profile using authenticated HTTP client
+          http.setAuth(token);
           let me = null;
           try {
-            me = await convexClient.query('users:current');
+            me = await http.query('users:current');
           } catch (e) { /* ignore */ }
+
           currentSessionUser = me?.user ? { id: me.user.id, ...me.user } : {
             id: 'user',
             full_name: m.full_name || '',
@@ -176,6 +243,10 @@ function createLiveConvexAdapter() {
             status: 'active',
           };
           await AsyncStorage.setItem(AUTH_USER_KEY, JSON.stringify(currentSessionUser));
+
+          // Also set auth on live WebSocket client
+          const ws = getConvexClient();
+          if (ws) ws.setAuth(fetchAuthToken);
 
           const session = { access_token: token, user: currentSessionUser };
           authListeners.forEach((fn) => fn('SIGNED_IN', session));
@@ -186,7 +257,10 @@ function createLiveConvexAdapter() {
       },
       async signInWithPassword({ email, password }) {
         try {
-          const res = await convexClient.action('auth:signIn', {
+          const http = getConvexHttpClient();
+          if (!http) throw new Error('Backend not configured');
+
+          const res = await http.action('auth:signIn', {
             provider: 'password',
             params: {
               flow: 'signIn',
@@ -199,22 +273,28 @@ function createLiveConvexAdapter() {
 
           currentToken = token;
           currentRefreshToken = res?.tokens?.refreshToken || null;
-          convexClient.setAuth(fetchAuthToken);
           await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
           if (currentRefreshToken) {
             await AsyncStorage.setItem(AUTH_REFRESH_TOKEN_KEY, currentRefreshToken);
           }
 
+          // Fetch full user profile using authenticated HTTP client
+          http.setAuth(token);
           let me = null;
           try {
-            me = await convexClient.query('users:current');
+            me = await http.query('users:current');
           } catch (e) { /* ignore */ }
+
           currentSessionUser = me?.user ? { id: me.user.id, ...me.user } : {
             id: 'user',
             phone: email.split('@')[0],
             status: 'active',
           };
           await AsyncStorage.setItem(AUTH_USER_KEY, JSON.stringify(currentSessionUser));
+
+          // Also set auth on live WebSocket client
+          const ws = getConvexClient();
+          if (ws) ws.setAuth(fetchAuthToken);
 
           const session = { access_token: token, user: currentSessionUser };
           authListeners.forEach((fn) => fn('SIGNED_IN', session));
@@ -225,7 +305,8 @@ function createLiveConvexAdapter() {
       },
       async signOut() {
         try {
-          await convexClient.action('auth:signOut', {});
+          const http = getConvexHttpClient();
+          if (http) await http.action('auth:signOut', {});
         } catch (e) {
           /* ignore */
         }
@@ -281,13 +362,13 @@ function createLiveConvexAdapter() {
             } else if (this.tbl === 'notifications') {
               data = await convexClient.query('notifications:list', { limit: this.limitNum });
             } else if (this.tbl === 'profiles') {
-              const cur = await convexClient.query('users:current');
-              data = cur?.user || null;
+              const cur = await fetchCurrentUserData();
+              data = cur?.user || currentSessionUser || null;
             } else if (this.tbl === 'operators') {
-              const cur = await convexClient.query('users:current');
+              const cur = await fetchCurrentUserData();
               data = cur?.operator || null;
             } else if (this.tbl === 'app_settings') {
-              const cur = await convexClient.query('users:current');
+              const cur = await fetchCurrentUserData();
               data = cur?.settings || null;
             } else if (this.tbl === 'wallet_transactions') {
               const w = await convexClient.query('operators:walletData');

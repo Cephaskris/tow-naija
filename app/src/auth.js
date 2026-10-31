@@ -30,17 +30,13 @@ export function AuthProvider({ children }) {
       ]);
       if (p) {
         setProfile(p);
-        setOperator(o);
-        setSettings(s);
-      } else {
-        // If query returned null, token is expired/invalid or profile does not exist
-        console.warn('Backend returned no profile for session user', uid);
-        await signOut();
+        if (o) setOperator(o);
+        if (s) setSettings(s);
       }
     } catch (e) {
       console.warn('loadUser error:', e);
     }
-  }, [signOut]);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -53,16 +49,18 @@ export function AuthProvider({ children }) {
       try {
         const sessionRes = await Promise.race([
           supabase.auth.getSession(),
-          new Promise((resolve) => setTimeout(() => resolve({ data: { session: null } }), 3000)),
+          new Promise((resolve) => setTimeout(() => resolve({ data: { session: null } }), 1500)),
         ]);
         if (!mounted) return;
         const s = sessionRes?.data?.session || null;
         setSession(s);
+        if (s?.user) {
+          // Immediately populate profile with cached user from local storage
+          setProfile(s.user);
+        }
         if (s?.user?.id) {
-          await Promise.race([
-            loadUser(s.user.id),
-            new Promise((resolve) => setTimeout(resolve, 3500)),
-          ]);
+          // Sync fresh profile/operator details in the background
+          loadUser(s.user.id).catch(() => {});
         }
       } catch (err) {
         console.warn('Auth init failed:', err);
@@ -72,7 +70,12 @@ export function AuthProvider({ children }) {
     })();
     const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') loadUser(s?.user?.id);
+      if (s?.user) setProfile(s.user);
+      if (event === 'SIGNED_IN') loadUser(s?.user?.id);
+      if (event === 'SIGNED_OUT') {
+        setProfile(null);
+        setOperator(null);
+      }
     });
     return () => { mounted = false; sub.subscription.unsubscribe(); };
   }, [loadUser]);
