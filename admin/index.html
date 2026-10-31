@@ -21,11 +21,14 @@
   --green-ink: #000000;
   --green-soft: #fcfde5;
   --on-green: #000000;
-  --amber: #f59e0b;
-  --amber-soft: #fffbeb;
-  --red: #ef4444;
-  --red-soft: #fef2f2;
-  --blue: #3b82f6;
+  --success: #16a34a;
+  --success-text: #15803d;
+  --success-soft: #dcfce7;
+  --amber: #b45309;
+  --amber-soft: #fef3c7;
+  --red: #dc2626;
+  --red-soft: #fee2e2;
+  --blue: #1d4ed8;
   --blue-soft: #eff6ff;
   --shadow: 0 8px 30px rgba(0, 0, 0, .05);
   --font: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
@@ -37,6 +40,7 @@
     --bg: #0b0c0e; --surface: #14161a; --surface-2: #1e2026; --line: #262830; --fg: #ffffff; --muted: #8e929e; --faint: #5a5e6b;
     --chrome: #070709; --chrome-fg: #ffffff; --chrome-muted: #8e929e;
     --green: #ebf826; --green-ink: #000000; --green-soft: rgba(235,248,38,0.16); --on-green: #000000;
+    --success: #22c55e; --success-text: #4ade80; --success-soft: rgba(34,197,94,0.16);
     --amber: #f59e0b; --amber-soft: #2e2510; --red: #ef4444; --red-soft: #3a1612; --blue: #3b82f6; --blue-soft: #14213d;
     --shadow: 0 8px 30px rgba(0,0,0,.6); color-scheme: dark;
   }
@@ -45,6 +49,7 @@
   --bg: #0b0c0e; --surface: #14161a; --surface-2: #1e2026; --line: #262830; --fg: #ffffff; --muted: #8e929e; --faint: #5a5e6b;
   --chrome: #070709; --chrome-fg: #ffffff; --chrome-muted: #8e929e;
   --green: #ebf826; --green-ink: #000000; --green-soft: rgba(235,248,38,0.16); --on-green: #000000;
+  --success: #22c55e; --success-text: #4ade80; --success-soft: rgba(34,197,94,0.16);
   --amber: #f59e0b; --amber-soft: #2e2510; --red: #ef4444; --red-soft: #3a1612; --blue: #3b82f6; --blue-soft: #14213d;
   --shadow: 0 8px 30px rgba(0,0,0,.6); color-scheme: dark;
 }
@@ -151,11 +156,21 @@ td .sub { color: var(--muted); font-size: 13px; }
 .empty { padding: 40px 16px; text-align: center; color: var(--muted); }
 
 /* Base tags */
-.chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; background: var(--surface-2); color: var(--fg); }
-.chip.green { background: var(--green-soft); color: var(--green); }
-.chip.amber { background: var(--amber-soft); color: var(--amber); }
-.chip.red { background: var(--red-soft); color: var(--red); }
-.chip.blue { background: var(--blue-soft); color: var(--blue); }
+.chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; background: var(--surface-2); color: var(--fg); border: 1px solid transparent; }
+.chip.green { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+.chip.amber { background: #fef3c7; color: #b45309; border-color: #fde68a; }
+.chip.red { background: #fee2e2; color: #dc2626; border-color: #fecaca; }
+.chip.blue { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .chip.green,
+  :root[data-theme="dark"] .chip.green { background: rgba(34, 197, 94, 0.16); color: #4ade80; border-color: rgba(74, 222, 128, 0.25); }
+  :root:not([data-theme="light"]) .chip.amber,
+  :root[data-theme="dark"] .chip.amber { background: #2e2510; color: #f59e0b; border-color: rgba(245, 158, 11, 0.25); }
+  :root:not([data-theme="light"]) .chip.red,
+  :root[data-theme="dark"] .chip.red { background: #3a1612; color: #ef4444; border-color: rgba(239, 68, 68, 0.25); }
+  :root:not([data-theme="light"]) .chip.blue,
+  :root[data-theme="dark"] .chip.blue { background: #14213d; color: #60a5fa; border-color: rgba(96, 165, 250, 0.25); }
+}
 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--faint); }
 .dot.on { background: var(--green); }
 
@@ -626,7 +641,7 @@ async function pageWallets() {
   <section><h2 class="section-title">Recent wallet activity</h2>
   <div class="table-wrap"><table><thead><tr><th>When</th><th>Operator</th><th>Type</th><th>Note</th><th style="text-align:right">Amount</th><th style="text-align:right">Balance after</th></tr></thead><tbody>
   ${ledger.map((t) => `<tr><td>${fmtDate(t.created_at)}</td><td>${esc(t.operator_name || "")}</td><td>${esc({ topup: "Top-up", commission: "Commission", adjustment: "Adjustment", refund: "Refund" }[t.kind])}</td><td>${esc(t.note)}</td>
-    <td class="num" style="text-align:right;color:${t.amount < 0 ? "var(--red)" : "var(--green)"};font-weight:700">${t.amount < 0 ? "−" : "+"}${naira(Math.abs(t.amount))}</td><td class="num" style="text-align:right">${naira(t.balance_after)}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">No wallet activity yet.</td></tr>`}
+    <td class="num" style="text-align:right;color:${t.amount < 0 ? "var(--red)" : "var(--success-text)"};font-weight:700">${t.amount < 0 ? "−" : "+"}${naira(Math.abs(t.amount))}</td><td class="num" style="text-align:right">${naira(t.balance_after)}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">No wallet activity yet.</td></tr>`}
   </tbody></table></div></section>`;
 }
 
@@ -640,7 +655,7 @@ async function pageDisputes() {
   <div class="table-wrap"><table><thead><tr><th>Job</th><th>Raised by</th><th>Reason</th><th>When</th><th>Status</th><th></th></tr></thead><tbody>
   ${list.map((d) => `<tr><td><b>${esc(d.ref)}</b><div class="sub num">${naira(d.final_price)}</div></td>
     <td>${esc(d.raiser_name)}<div class="sub">${d.raised_by_role === "customer" ? "Customer" : "Operator"} · <span class="num">${esc(d.raiser_phone)}</span></div></td>
-    <td style="max-width:320px"><b>${esc(d.reason)}</b><div class="sub">${esc(d.details)}</div>${d.resolution ? `<div class="sub" style="color:var(--green)">Resolved: ${esc(d.resolution)}</div>` : ""}</td>
+    <td style="max-width:320px"><b>${esc(d.reason)}</b><div class="sub">${esc(d.details)}</div>${d.resolution ? `<div class="sub" style="color:var(--success-text)">Resolved: ${esc(d.resolution)}</div>` : ""}</td>
     <td>${ago(d.created_at)}</td><td>${d.status === "open" ? '<span class="chip amber">Open</span>' : '<span class="chip green">Resolved</span>'}</td>
     <td style="text-align:right;white-space:nowrap"><button class="btn sm ghost" data-job="${esc(d.request_id)}">Open job</button>${d.status === "open" ? ` <button class="btn sm primary" data-resolve="${esc(d.id)}">Resolve</button>` : ""}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">${f === "open" ? "No open reports." : "Nothing here yet."}</td></tr>`}
   </tbody></table></div>`;
@@ -785,7 +800,7 @@ async function openOperator(id) {
     <div class="section"><h4>Performance</h4><dl class="kv"><dt>Jobs completed</dt><dd class="num">${o.jobs_completed}</dd><dt>Cancellations</dt><dd class="num">${o.cancellations || 0}</dd><dt>Rating</dt><dd class="num">${o.rating_count ? "★ " + Number(o.rating_avg).toFixed(1) + " from " + o.rating_count : "No ratings yet"}</dd></dl></div>
     <div class="section"><h4>Wallet · <span class="num" style="color:var(--fg)">${naira(o.wallet_balance)}</span></h4>
       <div class="actions"><button class="btn ghost" data-adjust="1">Credit</button><button class="btn ghost" data-adjust="-1">Debit</button></div>
-      ${(o.ledger || []).length ? `<div class="table-wrap" style="margin-top:12px"><table style="min-width:0"><tbody>${o.ledger.map((t) => `<tr><td class="sub">${fmtDate(t.created_at)}</td><td>${esc(t.note)}</td><td class="num" style="text-align:right;color:${t.amount < 0 ? "var(--red)" : "var(--green)"}">${t.amount < 0 ? "−" : "+"}${naira(Math.abs(t.amount))}</td></tr>`).join("")}</tbody></table></div>` : ""}
+      ${(o.ledger || []).length ? `<div class="table-wrap" style="margin-top:12px"><table style="min-width:0"><tbody>${o.ledger.map((t) => `<tr><td class="sub">${fmtDate(t.created_at)}</td><td>${esc(t.note)}</td><td class="num" style="text-align:right;color:${t.amount < 0 ? "var(--red)" : "var(--success-text)"}">${t.amount < 0 ? "−" : "+"}${naira(Math.abs(t.amount))}</td></tr>`).join("")}</tbody></table></div>` : ""}
     </div>
     ${(o.recent_jobs || []).length ? `<div class="section"><h4>Recent jobs</h4><div class="table-wrap"><table style="min-width:0"><tbody>${o.recent_jobs.map((j) => `<tr class="click" data-job="${esc(j.id)}"><td><b>${esc(j.ref)}</b></td><td>${chip(REQ, j.status)}</td><td class="num">${j.final_price ? naira(j.final_price) : "—"}</td><td class="sub">${ago(j.created_at)}</td></tr>`).join("")}</tbody></table></div></div>` : ""}
   </div>`);
