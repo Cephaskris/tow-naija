@@ -41,7 +41,7 @@ export function Menu({ params }) {
   };
   const updateSoftware = () => {
     const apkUrl = settings?.apk_url || "https://charming-donkey-521.convex.cloud/api/storage/d63b5b51-bb41-43dc-af70-aa09e7ba5125";
-    const curVer = "1.2.5";
+    const curVer = "1.2.6";
     const latest = settings?.latest_version || curVer;
     Alert.alert(
       'Update software',
@@ -84,11 +84,12 @@ export function Menu({ params }) {
           {isOp && !tab ? <MenuItem icon="credit-card" label="Wallet" onPress={() => nav.push('Wallet')} /> : null}
           <MenuItem icon="bell" label="Notifications" onPress={() => nav.push('Notifications')} />
           <MenuItem icon="download" label="Update software" sub={settings?.latest_version ? `v${settings.latest_version} · Tap to update` : "Check for updates"} onPress={updateSoftware} />
+          <MenuItem icon="lock" label="Change password" onPress={() => nav.push('ForgotPassword', { phone: profile?.phone })} />
           <MenuItem icon="help-circle" label="Contact support" sub={settings?.support_phone || undefined} onPress={support} />
           <MenuItem icon="log-out" label="Log out" danger onPress={out} last />
         </Card>
         <Gap h={20} />
-        <T v="small" muted center>Townaija · v1.2.5 · Made for Nigerian roads</T>
+        <T v="small" muted center>Townaija · v1.2.6 · Made for Nigerian roads</T>
       </Screen>
       {tab ? <TabBar items={isOp ? OPERATOR_TABS : CUSTOMER_TABS} active="Menu" onChange={(k) => nav.reset(k, { tab: true })} /> : null}
     </View>

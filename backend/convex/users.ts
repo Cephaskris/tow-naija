@@ -77,6 +77,24 @@ export const updateProfile = mutation({
   },
 });
 
+export const checkAccount = query({
+  args: { phone: v.string() },
+  handler: async (ctx, args) => {
+    const p = normPhone(args.phone);
+    if (!p || p.length < 10) return { exists: false };
+    const user = await ctx.db
+      .query("users")
+      .withIndex("phone", (q) => q.eq("phone", p))
+      .first();
+    if (!user) return { exists: false };
+    return {
+      exists: true,
+      name: user.full_name || user.name || "Customer",
+      phone: user.phone || p,
+    };
+  },
+});
+
 export const resetPassword = mutation({
   args: {
     phone: v.string(),

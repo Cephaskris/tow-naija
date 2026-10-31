@@ -97,45 +97,169 @@ export function Signup() {
   );
 }
 
-export function Login() {
+export function Login({ route }) {
   const nav = useNav();
   const { signIn } = useAuth();
-  const [f, setF] = useState({ phone: '', password: '' });
+  const [f, setF] = useState({ phone: route?.params?.phone || '', password: '' });
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
-  const [resetMode, setResetMode] = useState(false);
 
   const submit = async () => {
     setErr(''); setBusy(true);
-    if (resetMode) {
-      try {
-        if (!f.phone || !f.password) throw new Error('Enter your phone number and new password.');
-        if (f.password.length < 6) throw new Error('Password must be at least 6 characters.');
-        const http = getConvexHttpClient();
-        if (!http) throw new Error('Backend not connected');
-        await http.mutation('users:resetPassword', { phone: f.phone, new_password: f.password });
-        await signIn(f);
-      } catch (e) {
-        setErr(friendlyError(e.message));
-        setBusy(false);
-      }
-      return;
+    try {
+      await signIn(f);
+    } catch (e) {
+      setErr(friendlyError(e.message));
+      setBusy(false);
     }
-    try { await signIn(f); } catch (e) { setErr(e.message); setBusy(false); }
   };
+
   return (
-    <Screen footer={<Btn title={resetMode ? "Set New Password & Log In" : "Log in"} onPress={submit} loading={busy} />}>
-      <TopBar onBack={resetMode ? () => setResetMode(false) : nav.pop} title={resetMode ? "Reset Password" : "Welcome back"} sub={resetMode ? "Enter your phone and new password" : "Log in with your phone number"} />
+    <Screen footer={<Btn title="Log in" onPress={submit} loading={busy} />}>
+      <TopBar onBack={nav.pop} title="Welcome back" sub="Log in with your phone number" />
       <Gap h={8} />
       <View style={{ gap: 14 }}>
-        <Field label="Phone number" icon="phone" value={f.phone} onChangeText={(v) => setF({ ...f, phone: v })} placeholder="0803 123 4567" keyboardType="phone-pad" autoComplete="tel" />
-        <Field label={resetMode ? "New password" : "Password"} icon="lock" value={f.password} onChangeText={(v) => setF({ ...f, password: v })} placeholder={resetMode ? "At least 6 characters" : undefined} secureTextEntry autoComplete={resetMode ? "new-password" : "current-password"} />
+        <Field label="Phone number" icon="phone" value={f.phone} onChangeText={(v) => { setF({ ...f, phone: v }); setErr(''); }} placeholder="0803 123 4567" keyboardType="phone-pad" autoComplete="tel" />
+        <Field label="Password" icon="lock" value={f.password} onChangeText={(v) => { setF({ ...f, password: v }); setErr(''); }} secureTextEntry autoComplete="current-password" />
         {err ? <T color={C.red}>{err}</T> : null}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
           <Pressable onPress={() => nav.replace('Signup')}><T v="label">New here? <T v="label" style={{ textDecorationLine: 'underline' }}>Create account</T></T></Pressable>
-          <Pressable onPress={() => { setResetMode(!resetMode); setErr(''); }}><T v="label" style={{ textDecorationLine: 'underline' }}>{resetMode ? "Back to Login" : "Forgot password?"}</T></Pressable>
+          <Pressable onPress={() => nav.push('ForgotPassword', { phone: f.phone })}><T v="label" color={C.ink} style={{ textDecorationLine: 'underline', fontWeight: '600' }}>Forgot password?</T></Pressable>
         </View>
       </View>
+    </Screen>
+  );
+}
+
+export function ForgotPassword({ route }) {
+  const nav = useNav();
+  const { signIn } = useAuth();
+  const initialPhone = route?.params?.phone || '';
+  const [step, setStep] = useState(1);
+  const [phone, setPhone] = useState(initialPhone);
+  const [userFound, setUserFound] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const checkPhone = async () => {
+    setErr('');
+    const p = phone.replace(/\D/g, '');
+    if (p.length < 10) {
+      setErr('Enter a valid Nigerian phone number, e.g. 0803 123 4567.');
+      return;
+    }
+    setBusy(true);
+    try {
+      const http = getConvexHttpClient();
+      if (!http) throw new Error('Backend not connected');
+      const res = await http.query('users:checkAccount', { phone });
+      if (!res?.exists) {
+        throw new Error('No account found with this phone number. Please check the number or create an account.');
+      }
+      setUserFound(res);
+      setStep(2);
+    } catch (e) {
+      setErr(friendlyError(e.message));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleReset = async () => {
+    setErr('');
+    if (newPassword.length < 6) {
+      setErr('Password must be at least 6 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setErr('Passwords do not match. Please re-enter.');
+      return;
+    }
+    setBusy(true);
+    try {
+      const http = getConvexHttpClient();
+      if (!http) throw new Error('Backend not connected');
+      await http.mutation('users:resetPassword', { phone, new_password: newPassword });
+      await signIn({ phone, password: newPassword });
+    } catch (e) {
+      setErr(friendlyError(e.message));
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Screen
+      footer={
+        step === 1 ? (
+          <Btn title="Continue" onPress={checkPhone} loading={busy} />
+        ) : (
+          <Btn title="Reset Password & Log In" onPress={handleReset} loading={busy} />
+        )
+      }
+    >
+      <TopBar
+        onBack={step === 2 ? () => setStep(1) : nav.pop}
+        title="Forgot Password"
+        sub={step === 1 ? "Enter your phone number to find your account" : "Create a new password for your account"}
+      />
+      <Gap h={12} />
+      {step === 1 ? (
+        <View style={{ gap: 14 }}>
+          <Field
+            label="Phone number"
+            icon="phone"
+            value={phone}
+            onChangeText={(v) => { setPhone(v); setErr(''); }}
+            placeholder="0803 123 4567"
+            keyboardType="phone-pad"
+            autoComplete="tel"
+          />
+          {err ? <T color={C.red}>{err}</T> : null}
+          <T v="small" muted>
+            Enter the phone number linked to your Townaija account. We will verify your account and let you set a new password.
+          </T>
+          <Gap h={8} />
+          <Pressable onPress={() => nav.pop()}>
+            <T v="label" center style={{ textDecorationLine: 'underline' }}>Remember your password? Log in</T>
+          </Pressable>
+        </View>
+      ) : (
+        <View style={{ gap: 14 }}>
+          {userFound ? (
+            <View style={{ backgroundColor: C.soft, borderRadius: R.sm, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <Icon name="check-circle" size={24} color={C.green} />
+              <View style={{ flex: 1 }}>
+                <T v="bodyBold">{userFound.name}</T>
+                <T v="small" muted>{userFound.phone}</T>
+              </View>
+            </View>
+          ) : null}
+          <Field
+            label="New password"
+            icon="lock"
+            value={newPassword}
+            onChangeText={(v) => { setNewPassword(v); setErr(''); }}
+            placeholder="At least 6 characters"
+            secureTextEntry
+            autoComplete="new-password"
+          />
+          <Field
+            label="Confirm new password"
+            icon="lock"
+            value={confirmPassword}
+            onChangeText={(v) => { setConfirmPassword(v); setErr(''); }}
+            placeholder="Re-enter your new password"
+            secureTextEntry
+            autoComplete="new-password"
+          />
+          {err ? <T color={C.red}>{err}</T> : null}
+          <T v="small" muted>
+            After saving your new password, you will be automatically logged in.
+          </T>
+        </View>
+      )}
     </Screen>
   );
 }

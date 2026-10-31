@@ -12,13 +12,13 @@ import { useNotificationWatcher } from './src/hooks';
 import { onBackendChange } from './src/supabase';
 import { C, F } from './src/theme';
 import { Btn, Gap, Icon, Loading, T, ToastProvider } from './src/ui';
-import { Welcome, Signup, Login } from './src/screens/AuthScreens';
+import { Welcome, Signup, Login, ForgotPassword } from './src/screens/AuthScreens';
 import { CustomerHome, NewRequest, PickLocation, RequestLive, Report, History } from './src/screens/CustomerScreens';
 import { OperatorOnboard, OperatorStatus, OperatorHome, OperatorJob, OperatorActive, Wallet } from './src/screens/OperatorScreens';
 import { Menu, Notifications, Blocked } from './src/screens/CommonScreens';
 
 const SCREENS = {
-  Welcome, Signup, Login,
+  Welcome, Signup, Login, ForgotPassword,
   CustomerHome, NewRequest, PickLocation, RequestLive, Report, History,
   OperatorOnboard, OperatorStatus, OperatorHome, OperatorJob, OperatorActive, Wallet,
   Menu, Notifications,
