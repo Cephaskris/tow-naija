@@ -13,6 +13,13 @@ export function AuthProvider({ children }) {
   const [mode, setModeState] = useState('customer');
   const [loading, setLoading] = useState(true);
 
+  const signOut = useCallback(async () => {
+    try { await supabase.rpc('set_online', { p_online: false }); } catch (e) { /* not an operator */ }
+    setProfile(null);
+    setOperator(null);
+    await supabase.auth.signOut();
+  }, []);
+
   const loadUser = useCallback(async (uid) => {
     if (!uid) { setProfile(null); setOperator(null); return; }
     try {
@@ -21,11 +28,20 @@ export function AuthProvider({ children }) {
         select(supabase.from('operators').select('*').eq('id', uid).maybeSingle()),
         select(supabase.from('app_settings').select('*').maybeSingle()),
       ]);
-      setProfile(p); setOperator(o); setSettings(s);
+      if (p) {
+        setProfile(p);
+        setOperator(o);
+        setSettings(s);
+      } else {
+        // If query returned null, token is expired/invalid or profile does not exist
+        console.warn('Backend returned no profile for session user', uid);
+        await signOut();
+      }
     } catch (e) {
-      // Keep whatever we had; screens show their own errors.
+      console.warn('loadUser error:', e);
+      await signOut();
     }
-  }, []);
+  }, [signOut]);
 
   useEffect(() => {
     let mounted = true;
@@ -67,11 +83,6 @@ export function AuthProvider({ children }) {
   const signIn = useCallback(async ({ phone, password }) => {
     const { error } = await supabase.auth.signInWithPassword({ email: phoneEmail(phone), password });
     if (error) throw new Error(friendlyError(error.message));
-  }, []);
-
-  const signOut = useCallback(async () => {
-    try { await supabase.rpc('set_online', { p_online: false }); } catch (e) { /* not an operator */ }
-    await supabase.auth.signOut();
   }, []);
 
   const refresh = useCallback(() => loadUser(session?.user?.id), [loadUser, session]);

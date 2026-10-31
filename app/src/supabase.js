@@ -8,15 +8,45 @@ import { CONVEX_URL, CONVEX_SITE_URL, IS_CONFIGURED } from './config';
 */
 
 const AUTH_TOKEN_KEY = 'townaija.convex_token';
+const AUTH_REFRESH_TOKEN_KEY = 'townaija.convex_refresh_token';
 const AUTH_USER_KEY = 'townaija.convex_user';
 
 let convexClient = null;
 let currentToken = null;
+let currentRefreshToken = null;
 let currentSessionUser = null;
 const authListeners = new Set();
 
 if (IS_CONFIGURED) {
   convexClient = new ConvexClient(CONVEX_URL);
+}
+
+async function fetchAuthToken({ forceRefreshToken } = {}) {
+  if (forceRefreshToken && currentRefreshToken && convexClient) {
+    try {
+      const res = await convexClient.action('auth:signIn', {
+        refreshToken: currentRefreshToken,
+      });
+      if (res?.tokens?.token) {
+        currentToken = res.tokens.token;
+        if (res.tokens.refreshToken) currentRefreshToken = res.tokens.refreshToken;
+        await AsyncStorage.setItem(AUTH_TOKEN_KEY, currentToken);
+        if (currentRefreshToken) await AsyncStorage.setItem(AUTH_REFRESH_TOKEN_KEY, currentRefreshToken);
+        return currentToken;
+      }
+    } catch (e) {
+      // Refresh failed, token is invalid
+      currentToken = null;
+      currentRefreshToken = null;
+      currentSessionUser = null;
+      try {
+        await AsyncStorage.multiRemove([AUTH_TOKEN_KEY, AUTH_REFRESH_TOKEN_KEY, AUTH_USER_KEY]);
+      } catch (err) {}
+      authListeners.forEach((fn) => fn('SIGNED_OUT', null));
+      return null;
+    }
+  }
+  return currentToken;
 }
 
 // Map RPC function names to Convex queries, mutations, or actions
@@ -55,11 +85,12 @@ function createLiveConvexAdapter() {
         try {
           if (!currentToken) {
             currentToken = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
+            currentRefreshToken = await AsyncStorage.getItem(AUTH_REFRESH_TOKEN_KEY);
             const userStr = await AsyncStorage.getItem(AUTH_USER_KEY);
             if (userStr) currentSessionUser = JSON.parse(userStr);
           }
           if (currentToken && convexClient) {
-            convexClient.setAuth(async () => currentToken);
+            convexClient.setAuth(fetchAuthToken);
           }
           if (!currentToken || !currentSessionUser) {
             return { data: { session: null } };
@@ -103,12 +134,24 @@ function createLiveConvexAdapter() {
           if (!token) throw new Error('Account created, please sign in.');
 
           currentToken = token;
-          convexClient.setAuth(async () => token);
+          currentRefreshToken = res?.tokens?.refreshToken || null;
+          convexClient.setAuth(fetchAuthToken);
           await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
+          if (currentRefreshToken) {
+            await AsyncStorage.setItem(AUTH_REFRESH_TOKEN_KEY, currentRefreshToken);
+          }
 
-          // Get current user profile
-          const me = await convexClient.query('users:current');
-          currentSessionUser = me?.user ? { id: me.user.id, ...me.user } : { id: 'user' };
+          // Get current user profile or fallback to sign-up details
+          let me = null;
+          try {
+            me = await convexClient.query('users:current');
+          } catch (e) { /* ignore */ }
+          currentSessionUser = me?.user ? { id: me.user.id, ...me.user } : {
+            id: 'user',
+            full_name: m.full_name || '',
+            phone: m.phone || email.split('@')[0],
+            status: 'active',
+          };
           await AsyncStorage.setItem(AUTH_USER_KEY, JSON.stringify(currentSessionUser));
 
           const session = { access_token: token, user: currentSessionUser };
@@ -132,11 +175,22 @@ function createLiveConvexAdapter() {
           if (!token) throw new Error('Invalid login credentials');
 
           currentToken = token;
-          convexClient.setAuth(async () => token);
+          currentRefreshToken = res?.tokens?.refreshToken || null;
+          convexClient.setAuth(fetchAuthToken);
           await AsyncStorage.setItem(AUTH_TOKEN_KEY, token);
+          if (currentRefreshToken) {
+            await AsyncStorage.setItem(AUTH_REFRESH_TOKEN_KEY, currentRefreshToken);
+          }
 
-          const me = await convexClient.query('users:current');
-          currentSessionUser = me?.user ? { id: me.user.id, ...me.user } : { id: 'user' };
+          let me = null;
+          try {
+            me = await convexClient.query('users:current');
+          } catch (e) { /* ignore */ }
+          currentSessionUser = me?.user ? { id: me.user.id, ...me.user } : {
+            id: 'user',
+            phone: email.split('@')[0],
+            status: 'active',
+          };
           await AsyncStorage.setItem(AUTH_USER_KEY, JSON.stringify(currentSessionUser));
 
           const session = { access_token: token, user: currentSessionUser };
@@ -153,10 +207,14 @@ function createLiveConvexAdapter() {
           /* ignore */
         }
         currentToken = null;
+        currentRefreshToken = null;
         currentSessionUser = null;
-        if (convexClient) convexClient.clearAuth();
-        await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
-        await AsyncStorage.removeItem(AUTH_USER_KEY);
+        if (convexClient) {
+          try { convexClient.setAuth(async () => null); } catch (e) {}
+        }
+        try {
+          await AsyncStorage.multiRemove([AUTH_TOKEN_KEY, AUTH_REFRESH_TOKEN_KEY, AUTH_USER_KEY]);
+        } catch (e) {}
         authListeners.forEach((fn) => fn('SIGNED_OUT', null));
         return { error: null };
       },

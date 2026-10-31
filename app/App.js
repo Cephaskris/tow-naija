@@ -11,7 +11,7 @@ import { Navigator, useNav } from './src/nav';
 import { useNotificationWatcher } from './src/hooks';
 import { onBackendChange } from './src/supabase';
 import { C, F } from './src/theme';
-import { Icon, Loading, ToastProvider } from './src/ui';
+import { Btn, Gap, Icon, Loading, T, ToastProvider } from './src/ui';
 import { Welcome, Signup, Login } from './src/screens/AuthScreens';
 import { CustomerHome, NewRequest, PickLocation, RequestLive, Report, History } from './src/screens/CustomerScreens';
 import { OperatorOnboard, OperatorStatus, OperatorHome, OperatorJob, OperatorActive, Wallet } from './src/screens/OperatorScreens';
@@ -68,12 +68,32 @@ function Banner() {
 }
 
 function Root() {
-  const { loading, session, profile, operator, mode } = useAuth();
+  const { loading, session, profile, operator, mode, refresh, signOut } = useAuth();
   useEffect(() => { if (!loading) SplashScreen.hideAsync().catch(() => {}); }, [loading]);
+
+  useEffect(() => {
+    if (session && !profile && !loading) {
+      const timer = setTimeout(() => {
+        refresh();
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [session, profile, loading, refresh]);
 
   if (loading) return <Loading />;
   if (!session) return <Navigator key="guest" initial={{ name: 'Welcome' }} screens={SCREENS} />;
-  if (!profile) return <Loading text="Setting up your account…" />;
+  if (!profile) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24, backgroundColor: C.bg }}>
+        <StatusBar style="dark" />
+        <Loading text="Setting up your account…" />
+        <View style={{ position: 'absolute', bottom: 48, width: '100%', maxWidth: 300, gap: 10 }}>
+          <Btn title="Retry" variant="secondary" onPress={refresh} />
+          <Btn title="Sign in again" variant="ghost" danger onPress={signOut} />
+        </View>
+      </View>
+    );
+  }
   if (profile.status === 'blocked') return <Blocked />;
 
   let initial = 'CustomerHome';
