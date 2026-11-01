@@ -2,14 +2,14 @@
   "expo": {
     "name": "Townaija",
     "slug": "townaija",
-    "version": "1.2.6",
+    "version": "1.2.7",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "android": {
       "package": "ng.townaija.app",
-      "versionCode": 9,
+      "versionCode": 10,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F5EF3A"
@@ -22,14 +22,6 @@
       ]
     },
     "plugins": [
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/splash-icon.png",
-          "imageWidth": 180,
-          "backgroundColor": "#EDEDED"
-        }
-      ],
       [
         "expo-location",
         {
