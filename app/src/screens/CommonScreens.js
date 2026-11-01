@@ -40,7 +40,7 @@ export function Menu({ params }) {
     Linking.openURL(`tel:${phone.replace(/\s/g, '')}`).catch(() => toast.show(phone));
   };
   const updateSoftware = () => {
-    const apkUrl = settings?.apk_url || "https://charming-donkey-521.convex.cloud/api/storage/kg2c9paxxx7tn7v4txmvyd7jxn8hdzm4";
+    const apkUrl = settings?.apk_url || "https://charming-donkey-521.convex.cloud/api/storage/117e332b-fa68-4c80-89c1-7f477f85d47d";
     const curVer = "1.2.7";
     const latest = settings?.latest_version || curVer;
     Alert.alert(
