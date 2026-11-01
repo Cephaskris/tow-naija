@@ -1,4 +1,4 @@
-const APK_DOWNLOAD_URL = "https://charming-donkey-521.convex.cloud/api/storage/0fd498e2-249e-42b2-b79e-2ac837e3ece1";
+const APK_DOWNLOAD_URL = "https://charming-donkey-521.convex.cloud/api/storage/c819434e-68ae-4046-88e4-f9ce54e2768e";
 
 export default {
   async fetch(request, env) {

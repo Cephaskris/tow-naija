@@ -21,6 +21,12 @@ import { CUSTOMER_TABS, OPERATOR_TABS } from '../tabs';
 const FALLBACK_FROM = { car: 20000, suv: 25000, van_bus: 25000, truck: 80000 };
 const TRUCKS_FOR = { car: ['wheel_lift', 'flatbed'], suv: ['flatbed'], van_bus: ['flatbed'], truck: ['heavy_duty'] };
 const VEHICLE_NOTE = { car: 'Saloon, hatchback, coupé', suv: 'Jeeps, 4×4s and crossovers', van_bus: 'Hiace, Sienna, minibuses', truck: 'Lorries, tippers, tankers' };
+const VEHICLE_IMAGE = {
+  car: require('../../assets/vehicle-car.jpg'),
+  suv: require('../../assets/vehicle-suv.jpg'),
+  van_bus: require('../../assets/vehicle-van.jpg'),
+  truck: require('../../assets/vehicle-truck.jpg'),
+};
 
 /* =========================================================
    Home — "Welcome! Choose your vehicle" carousel, or the map
@@ -37,7 +43,10 @@ export function CustomerHome() {
   const [active, setActive] = useState(null);
   const [from, setFrom] = useState(FALLBACK_FROM);
   const [slide, setSlide] = useState(0);
-  const cardW = Dimensions.get('window').width - 36 - 56;
+  const scrollRef = useRef(null);
+  const win = Dimensions.get('window');
+  const cardW = win.width - 36 - 48;
+  const cardH = Math.min(Math.max(380, win.height - 460), 500);
 
   const locate = useCallback(async () => {
     try {
@@ -135,11 +144,38 @@ export function CustomerHome() {
           right={<RoundBtn name="bell" label="Notifications" onPress={() => nav.push('Notifications')} />}
         />
         <Gap h={8} />
-        <Title title={`Welcome${profile?.full_name ? `, ${firstName(profile.full_name)}` : ''}!`} sub={active ? 'Your tow is in progress' : 'Choose your vehicle'} />
-        <Gap h={16} />
+        <Title title={`Welcome${profile?.full_name ? `, ${firstName(profile.full_name)}` : ''}!`} sub={active ? 'Your tow is in progress' : 'Tap your vehicle below to request a tow'} />
+        <Gap h={14} />
         {activeCard || (
           <>
             <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 8, paddingBottom: 12 }}
+            >
+              {Object.keys(VEHICLE).map((v, idx) => {
+                const isSelected = slide === idx;
+                return (
+                  <Pressable
+                    key={v}
+                    onPress={() => {
+                      if (isSelected) {
+                        start(v);
+                      } else {
+                        setSlide(idx);
+                        scrollRef.current?.scrollTo({ x: idx * (cardW + 12), animated: true });
+                      }
+                    }}
+                    style={[styles.vQuickPill, isSelected && styles.vQuickPillActive]}
+                  >
+                    <Icon name={VEHICLE_ICON[v]} size={16} color={C.ink} />
+                    <T v="label" style={{ fontFamily: isSelected ? F.semi : F.medium }}>{VEHICLE[v]}</T>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+            <ScrollView
+              ref={scrollRef}
               horizontal
               showsHorizontalScrollIndicator={false}
               snapToInterval={cardW + 12}
@@ -149,21 +185,36 @@ export function CustomerHome() {
               contentContainerStyle={{ paddingHorizontal: 18, gap: 12 }}
             >
               {Object.keys(VEHICLE).map((v) => (
-                <Pressable key={v} onPress={() => start(v)} style={[styles.vCard, { width: cardW }]} accessibilityRole="button" accessibilityLabel={`Tow a ${VEHICLE[v]}`}>
-                  <Row gap={8}>
-                    <Badge icon="tag" text={`from ${naira(from[v])}`} />
-                    <Badge icon="mc:tow-truck" text={TRUCKS_FOR[v].map((t) => TRUCK[t]).join(' / ')} />
+                <Pressable
+                  key={v}
+                  onPress={() => start(v)}
+                  style={({ pressed }) => [
+                    styles.vCard,
+                    { width: cardW, height: cardH },
+                    pressed && { opacity: 0.92, transform: [{ scale: 0.99 }] },
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Request a tow for a ${VEHICLE[v]}`}
+                >
+                  <Image source={VEHICLE_IMAGE[v]} style={styles.vBgImage} resizeMode="cover" />
+                  <View style={styles.vScrimTop} pointerEvents="none" />
+                  <Row gap={8} style={{ justifyContent: 'space-between', zIndex: 2 }}>
+                    <Row gap={8} style={{ flexWrap: 'wrap', flex: 1 }}>
+                      <Badge dark icon="tag" text={`from ${naira(from[v])}`} />
+                      <Badge dark icon="mc:tow-truck" text={TRUCKS_FOR[v].map((t) => TRUCK[t]).join(' / ')} />
+                    </Row>
                   </Row>
-                  <View style={styles.vArt}>
-                    <View style={styles.vCircle} />
-                    <Icon name={VEHICLE_ICON[v]} size={128} color={C.ink} />
-                  </View>
                   <View style={styles.vFoot}>
                     <View style={{ flex: 1 }}>
                       <T v="h3" color={C.white}>{VEHICLE[v]}</T>
-                      <T v="small" color="#C9C9C9" numberOfLines={1}>{VEHICLE_NOTE[v]}</T>
+                      <T v="small" color="#D4D4D4" numberOfLines={1}>{VEHICLE_NOTE[v]}</T>
                     </View>
-                    <ArrowBtn label={`Request a tow for a ${VEHICLE[v]}`} onPress={() => start(v)} />
+                    <View style={styles.vActionPill}>
+                      <T v="label" color={C.ink} style={{ fontFamily: F.semi }}>Select</T>
+                      <View style={styles.vActionArrow}>
+                        <Icon name="arrow-up-right" size={16} color={C.ink} />
+                      </View>
+                    </View>
                   </View>
                 </Pressable>
               ))}
@@ -173,10 +224,10 @@ export function CustomerHome() {
           </>
         )}
         <Gap h={18} />
-        <Card style={{ gap: 12 }}>
+        <Card onPress={() => start(Object.keys(VEHICLE)[slide] || 'car')} style={{ gap: 12 }}>
           <Row style={{ justifyContent: 'space-between' }}>
             <View style={{ flex: 1 }}>
-              <T v="tiny" muted>Pickup</T>
+              <T v="tiny" muted>Pickup · Tap to set destination</T>
               <T v="bodyBold" numberOfLines={1}>{addr}</T>
             </View>
             <RoundBtn name="crosshair" label="Refresh my location" onPress={locate} style={{ backgroundColor: C.soft }} />
@@ -752,10 +803,77 @@ export function History({ params }) {
 const styles = StyleSheet.create({
   floatTop: { position: 'absolute', left: 18, right: 18, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 },
   float: { elevation: 5, shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 10, shadowOffset: { width: 0, height: 3 }, borderRadius: R.pill },
-  vCard: { backgroundColor: C.white, borderRadius: 32, padding: 12, height: 360, justifyContent: 'space-between' },
-  vArt: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  vCircle: { position: 'absolute', width: 200, height: 200, borderRadius: 100, backgroundColor: C.soft },
-  vFoot: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.ink, borderRadius: 26, padding: 10, paddingLeft: 18 },
+  vQuickPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: C.white,
+    paddingHorizontal: 16,
+    height: 40,
+    borderRadius: R.pill,
+    borderWidth: 1.5,
+    borderColor: C.line,
+  },
+  vQuickPillActive: {
+    backgroundColor: C.accent,
+    borderColor: C.ink,
+  },
+  vCard: {
+    backgroundColor: C.ink,
+    borderRadius: 32,
+    padding: 14,
+    height: 380,
+    justifyContent: 'space-between',
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: C.white,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 5,
+  },
+  vBgImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
+  },
+  vScrimTop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 90,
+    backgroundColor: 'rgba(0,0,0,0.22)',
+  },
+  vFoot: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: 'rgba(15, 16, 18, 0.92)',
+    borderRadius: 26,
+    padding: 10,
+    paddingLeft: 18,
+    zIndex: 2,
+  },
+  vActionPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: C.accent,
+    borderRadius: R.pill,
+    paddingLeft: 16,
+    paddingRight: 6,
+    height: 46,
+  },
+  vActionArrow: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   centerPin: { position: 'absolute', top: '50%', left: '50%', marginLeft: -21, marginTop: -62, alignItems: 'center' },
   pinHead: { width: 42, height: 42, borderRadius: 21, backgroundColor: C.white, borderWidth: 1.5, borderColor: C.ink, alignItems: 'center', justifyContent: 'center' },
   pinStem: { width: 2, height: 20, backgroundColor: C.ink },
