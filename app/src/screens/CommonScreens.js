@@ -40,8 +40,8 @@ export function Menu({ params }) {
     Linking.openURL(`tel:${phone.replace(/\s/g, '')}`).catch(() => toast.show(phone));
   };
   const updateSoftware = () => {
-    const apkUrl = settings?.apk_url || "https://charming-donkey-521.convex.cloud/api/storage/117e332b-fa68-4c80-89c1-7f477f85d47d";
-    const curVer = "1.2.7";
+    const apkUrl = settings?.apk_url || "https://charming-donkey-521.convex.cloud/api/storage/3d91360b-6c31-4a1e-9064-faa886f83f86";
+    const curVer = "1.2.8";
     const latest = settings?.latest_version || curVer;
     Alert.alert(
       'Update software',
@@ -89,7 +89,7 @@ export function Menu({ params }) {
           <MenuItem icon="log-out" label="Log out" danger onPress={out} last />
         </Card>
         <Gap h={20} />
-        <T v="small" muted center>Townaija · v1.2.7 · Made for Nigerian roads</T>
+        <T v="small" muted center>Townaija · v1.2.8 · Made for Nigerian roads</T>
       </Screen>
       {tab ? <TabBar items={isOp ? OPERATOR_TABS : CUSTOMER_TABS} active="Menu" onChange={(k) => nav.reset(k, { tab: true })} /> : null}
     </View>

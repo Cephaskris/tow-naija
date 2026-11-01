@@ -40,6 +40,15 @@ export function getConvexHttpClient() {
   return _httpClient;
 }
 
+export function getUnauthedHttpClient() {
+  if (!IS_CONFIGURED) return null;
+  try {
+    return new ConvexHttpClient(CONVEX_URL);
+  } catch (e) {
+    return getConvexHttpClient();
+  }
+}
+
 const convexClient = new Proxy({}, {
   get(target, prop) {
     const client = getConvexClient();
@@ -65,15 +74,35 @@ export async function fetchCurrentUserData() {
       const http = getConvexHttpClient();
       if (http && currentToken) {
         http.setAuth(currentToken);
-        const data = await Promise.race([
-          http.query('users:current'),
-          new Promise((resolve) => setTimeout(() => resolve(null), 3000)),
-        ]);
-        if (data?.user) {
-          _cachedUserData = data;
-          currentSessionUser = data.user;
-          try { await AsyncStorage.setItem(AUTH_USER_KEY, JSON.stringify(data.user)); } catch (e) {}
-          return data;
+        try {
+          const data = await Promise.race([
+            http.query('users:current'),
+            new Promise((resolve) => setTimeout(() => resolve(null), 3000)),
+          ]);
+          if (data?.user) {
+            _cachedUserData = data;
+            currentSessionUser = data.user;
+            try { await AsyncStorage.setItem(AUTH_USER_KEY, JSON.stringify(data.user)); } catch (e) {}
+            return data;
+          }
+        } catch (err) {
+          // If the token on http was expired, try refreshing via refreshToken
+          if (currentRefreshToken) {
+            const refreshed = await fetchAuthToken({ forceRefreshToken: true });
+            if (refreshed) {
+              http.setAuth(refreshed);
+              const retryData = await Promise.race([
+                http.query('users:current'),
+                new Promise((resolve) => setTimeout(() => resolve(null), 3000)),
+              ]).catch(() => null);
+              if (retryData?.user) {
+                _cachedUserData = retryData;
+                currentSessionUser = retryData.user;
+                try { await AsyncStorage.setItem(AUTH_USER_KEY, JSON.stringify(retryData.user)); } catch (e) {}
+                return retryData;
+              }
+            }
+          }
         }
       }
 
@@ -106,7 +135,7 @@ export async function fetchCurrentUserData() {
 }
 
 async function fetchAuthToken({ forceRefreshToken } = {}) {
-  const http = getConvexHttpClient();
+  const http = getUnauthedHttpClient();
   if (forceRefreshToken && currentRefreshToken && http) {
     try {
       const res = await http.action('auth:signIn', {
@@ -115,6 +144,8 @@ async function fetchAuthToken({ forceRefreshToken } = {}) {
       if (res?.tokens?.token) {
         currentToken = res.tokens.token;
         if (res.tokens.refreshToken) currentRefreshToken = res.tokens.refreshToken;
+        const sharedHttp = getConvexHttpClient();
+        if (sharedHttp) sharedHttp.setAuth(currentToken);
         await AsyncStorage.setItem(AUTH_TOKEN_KEY, currentToken);
         if (currentRefreshToken) await AsyncStorage.setItem(AUTH_REFRESH_TOKEN_KEY, currentRefreshToken);
         return currentToken;
@@ -124,6 +155,8 @@ async function fetchAuthToken({ forceRefreshToken } = {}) {
       currentToken = null;
       currentRefreshToken = null;
       currentSessionUser = null;
+      const sharedHttp = getConvexHttpClient();
+      if (sharedHttp) sharedHttp.clearAuth();
       try {
         await AsyncStorage.multiRemove([AUTH_TOKEN_KEY, AUTH_REFRESH_TOKEN_KEY, AUTH_USER_KEY]);
       } catch (err) {}
@@ -206,10 +239,12 @@ function createLiveConvexAdapter() {
       async signUp({ email, password, options }) {
         try {
           const m = options?.data || {};
+          const authHttp = getUnauthedHttpClient();
           const http = getConvexHttpClient();
-          if (!http) throw new Error('Backend not configured');
+          if (!authHttp || !http) throw new Error('Backend not configured');
+          http.clearAuth();
 
-          const res = await http.action('auth:signIn', {
+          const res = await authHttp.action('auth:signIn', {
             provider: 'password',
             params: {
               flow: 'signUp',
@@ -257,10 +292,12 @@ function createLiveConvexAdapter() {
       },
       async signInWithPassword({ email, password }) {
         try {
+          const authHttp = getUnauthedHttpClient();
           const http = getConvexHttpClient();
-          if (!http) throw new Error('Backend not configured');
+          if (!authHttp || !http) throw new Error('Backend not configured');
+          http.clearAuth();
 
-          const res = await http.action('auth:signIn', {
+          const res = await authHttp.action('auth:signIn', {
             provider: 'password',
             params: {
               flow: 'signIn',
@@ -306,9 +343,13 @@ function createLiveConvexAdapter() {
       async signOut() {
         try {
           const http = getConvexHttpClient();
-          if (http) await http.action('auth:signOut', {});
+          if (http) {
+            await http.action('auth:signOut', {});
+            http.clearAuth();
+          }
         } catch (e) {
-          /* ignore */
+          const http = getConvexHttpClient();
+          if (http) http.clearAuth();
         }
         currentToken = null;
         currentRefreshToken = null;

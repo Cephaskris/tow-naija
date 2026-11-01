@@ -3,7 +3,7 @@ import { Dimensions, Pressable, ScrollView, StyleSheet, View } from 'react-nativ
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../auth';
 import { useNav } from '../nav';
-import { hasLiveBackend, isDemo, setDemoBackend, friendlyError, getConvexHttpClient } from '../supabase';
+import { hasLiveBackend, isDemo, setDemoBackend, friendlyError, getUnauthedHttpClient } from '../supabase';
 import { C, R } from '../theme';
 import { ArrowBtn, Badge, Btn, Dots, Field, Gap, Icon, Screen, T, Title, TopBar } from '../ui';
 
@@ -152,7 +152,7 @@ export function ForgotPassword({ route }) {
     }
     setBusy(true);
     try {
-      const http = getConvexHttpClient();
+      const http = getUnauthedHttpClient();
       if (!http) throw new Error('Backend not connected');
       const res = await http.query('users:checkAccount', { phone });
       if (!res?.exists) {
@@ -179,7 +179,7 @@ export function ForgotPassword({ route }) {
     }
     setBusy(true);
     try {
-      const http = getConvexHttpClient();
+      const http = getUnauthedHttpClient();
       if (!http) throw new Error('Backend not connected');
       await http.mutation('users:resetPassword', { phone, new_password: newPassword });
       await signIn({ phone, password: newPassword });

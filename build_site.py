@@ -17,7 +17,7 @@ if (root / "landing" / "assets").exists():
 env = lambda k, d="": os.environ.get(k, d).strip()
 
 page = (root / "landing" / "index.html").read_text(encoding="utf-8")
-apk_default = "https://charming-donkey-521.convex.cloud/api/storage/117e332b-fa68-4c80-89c1-7f477f85d47d"
+apk_default = "https://charming-donkey-521.convex.cloud/api/storage/3d91360b-6c31-4a1e-9064-faa886f83f86"
 page = page.replace('href="[YOUR APK LINK]"', f'href="{env("APK_URL", apk_default)}"')
 page = page.replace("[COMMISSION]", env("COMMISSION", "10"))
 for key, token in (("SUPPORT_PHONE", "[SUPPORT PHONE]"), ("SUPPORT_EMAIL", "[SUPPORT EMAIL]")):
