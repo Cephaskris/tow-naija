@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Dimensions, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Dimensions, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../auth';
 import { useNav } from '../nav';
@@ -8,15 +8,32 @@ import { C, R } from '../theme';
 import { ArrowBtn, Badge, Btn, Dots, Field, Gap, Icon, Screen, T, Title, TopBar } from '../ui';
 
 const SLIDES = [
-  { icon: 'mc:tow-truck', badges: [['tag', 'You set the price'], ['map-pin', 'Near you']], title: 'Request a tow', sub: 'Pickup to your mechanic' },
-  { icon: 'mc:account-group-outline', badges: [['users', 'Real offers'], ['star', 'Rated operators']], title: 'Compare operators', sub: 'Price, rating and arrival time' },
-  { icon: 'mc:shield-check-outline', badges: [['lock', 'Start code'], ['camera', 'Photo record']], title: 'Tow with confidence', sub: 'Nothing moves without your code' },
+  {
+    image: require('../../assets/welcome-1.jpg'),
+    badges: [['tag', 'You set the price'], ['map-pin', 'Near you']],
+    title: 'Request a tow',
+    sub: 'Pickup to your mechanic',
+  },
+  {
+    image: require('../../assets/welcome-2.jpg'),
+    badges: [['users', 'Real offers'], ['star', 'Rated operators']],
+    title: 'Compare operators',
+    sub: 'Price, rating and arrival time',
+  },
+  {
+    image: require('../../assets/welcome-3.jpg'),
+    badges: [['lock', 'Start code'], ['camera', 'Photo record']],
+    title: 'Tow with confidence',
+    sub: 'Nothing moves without your code',
+  },
 ];
 
 export function Welcome() {
   const nav = useNav();
   const [i, setI] = useState(0);
-  const width = Dimensions.get('window').width - 36;
+  const win = Dimensions.get('window');
+  const width = win.width - 36;
+  const heroHeight = Math.min(Math.max(400, win.height - 340), 640);
   const ref = useRef(null);
   return (
     <Screen footer={
@@ -33,7 +50,7 @@ export function Welcome() {
       />
       <Gap h={10} />
       <Title title="Welcome!" sub="Stuck on the road? Get towed." />
-      <Gap h={20} />
+      <Gap h={18} />
       <ScrollView
         ref={ref}
         horizontal
@@ -46,13 +63,11 @@ export function Welcome() {
       >
         {SLIDES.map((s, k) => (
           <View key={s.title} style={{ width }}>
-            <View style={styles.heroInner}>
+            <View style={[styles.heroInner, { height: heroHeight }]}>
+              <Image source={s.image} style={styles.heroBgImage} resizeMode="cover" />
+              <View style={styles.heroScrimTop} pointerEvents="none" />
               <View style={styles.badges}>
-                {s.badges.map(([ic, tx]) => <Badge key={tx} icon={ic} text={tx} />)}
-              </View>
-              <View style={styles.heroArt}>
-                <View style={styles.heroCircle} />
-                <Icon name={s.icon} size={118} color={C.ink} />
+                {s.badges.map(([ic, tx]) => <Badge key={tx} dark icon={ic} text={tx} />)}
               </View>
               <View style={styles.heroFoot}>
                 <View style={{ flex: 1 }}>
@@ -266,10 +281,43 @@ export function ForgotPassword({ route }) {
 
 const styles = StyleSheet.create({
   logo: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: C.white, borderRadius: R.pill, paddingHorizontal: 16, height: 48 },
-  heroInner: { backgroundColor: C.white, borderRadius: 32, padding: 14, height: 380, justifyContent: 'space-between', marginHorizontal: 5 },
-  badges: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  heroArt: { alignItems: 'center', justifyContent: 'center', flex: 1 },
-  heroCircle: { position: 'absolute', width: 210, height: 210, borderRadius: 105, backgroundColor: C.accent, opacity: 0.55 },
-  heroFoot: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.soft, borderRadius: 24, padding: 12, paddingLeft: 16 },
+  heroInner: {
+    backgroundColor: C.ink,
+    borderRadius: 32,
+    padding: 14,
+    height: 440,
+    justifyContent: 'space-between',
+    marginHorizontal: 5,
+    overflow: 'hidden',
+  },
+  heroBgImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
+  },
+  heroScrimTop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 96,
+    backgroundColor: 'rgba(0,0,0,0.18)',
+  },
+  badges: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', zIndex: 2 },
+  heroFoot: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    borderRadius: 24,
+    padding: 12,
+    paddingLeft: 18,
+    zIndex: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.14,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
 });
 

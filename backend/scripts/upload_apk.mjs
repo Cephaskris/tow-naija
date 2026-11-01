@@ -49,7 +49,7 @@ async function main() {
   const downloadUrl = await client.query('files:getFileUrl', { storage_id: storageId });
   console.log('Uploaded successfully! Download URL:', downloadUrl);
 
-  const newVersion = '1.2.8';
+  const newVersion = '1.2.9';
   console.log(`Updating app release in settings to v${newVersion}...`);
   await client.mutation('seed:updateAppRelease', {
     apk_url: downloadUrl,
